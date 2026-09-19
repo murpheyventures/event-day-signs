@@ -24,6 +24,9 @@ export const PUBLIC_ID_PREFIXES = {
   refund: 'rfnd',
   orderItem: 'itm',
   inventoryException: 'iexc',
+  design: 'des',
+  designVariant: 'dvar',
+  offer: 'off',
 } as const;
 
 export type PublicIdKind = keyof typeof PUBLIC_ID_PREFIXES;

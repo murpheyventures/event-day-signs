@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { getProductBySlug } from '../../../features/products/db';
+import { getNormalizedDesign } from '../../../features/catalog/db';
 import { listVariants, listExtras } from '../../../features/products/variants';
 import { categoriesForProduct } from '../../../features/categories/db';
-import { toCatalogProduct } from '../../../features/catalog/serialize';
+import { toCatalogDesign, toCatalogProduct } from '../../../features/catalog/serialize';
 import { catalogJson, catalogPreflight } from '../../../features/catalog/http';
 import { getConfig } from '../../../config';
 import { publicOrigin } from '../../../features/http/origin';
@@ -16,6 +17,15 @@ export const OPTIONS: APIRoute = () => catalogPreflight();
 /** GET /api/products/:slug — one product as catalog JSON (with variants + extras).
     404 if missing/inactive. */
 export const GET: APIRoute = async ({ params, url }) => {
+  const design = params.slug ? await getNormalizedDesign(env.DB, params.slug) : null;
+  if (design) {
+    const response = catalogJson(
+      toCatalogDesign(design, publicOrigin(url.origin, env.CANONICAL_ORIGIN)),
+    );
+    addCacheTags(response.headers, ['catalog']);
+    return response;
+  }
+
   const product = params.slug ? await getProductBySlug(env.DB, params.slug) : null;
   if (!product || product.active !== 1) {
     return catalogJson({ error: 'Product not found' }, 404);

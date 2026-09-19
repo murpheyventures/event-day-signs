@@ -2,6 +2,7 @@ import type { Product } from '../products/db';
 import type { ProductVariant, ProductExtra } from '../products/variants';
 import { productImageUrl } from '../products/image';
 import { toMajorUnits } from '../../money';
+import type { NormalizedDesign } from './normalized';
 
 /** A purchasable variant in catalog form (price in both major + minor units). */
 export interface CatalogVariant {
@@ -105,6 +106,42 @@ export function toCatalogProduct(
     }));
   }
   return out;
+}
+
+/** Serialize a normalized design into the backward-compatible public catalog shape. */
+export function toCatalogDesign(
+  design: NormalizedDesign,
+  origin: string,
+): CatalogProduct {
+  const firstOffer = design.offers[0];
+  if (!firstOffer) throw new Error(`Design ${design.id} has no active offers`);
+  const variantNames = new Map(design.variants.map((variant) => [variant.id, variant.name]));
+  const offers = design.offers;
+
+  return {
+    id: design.id,
+    slug: design.slug,
+    name: design.title,
+    description: design.description,
+    price: money(firstOffer.price_cents, firstOffer.currency),
+    in_stock: offers.some((offer) => offer.in_stock),
+    variant_label: design.variants.length > 0 ? 'Options' : null,
+    categories: design.categories,
+    image: new URL('/placeholder.png', origin).href,
+    url: new URL(`/products/${design.slug}`, origin).href,
+    variants:
+      design.variants.length > 0
+        ? offers
+            .filter((offer) => offer.variant_id !== null)
+            .map((offer) => ({
+              id: offer.id,
+              label: variantNames.get(offer.variant_id!) ?? offer.label ?? 'Option',
+              price: money(offer.price_cents, offer.currency),
+              in_stock: offer.in_stock,
+              sku: offer.sku,
+            }))
+        : undefined,
+  };
 }
 
 /**

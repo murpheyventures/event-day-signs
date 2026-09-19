@@ -22,8 +22,12 @@ Baseline commit: `c964bf746926ae039a97d69720eee26fb97ba06f`
   variant selection.
 - [ ] Decide whether baseline tooling defects should be fixed in a separate
   maintenance commit before Milestone 1, or carried as documented limitations.
-- [ ] After approval: commit/tag the Milestone 0 documents and begin Milestone 1
+- [x] After approval: commit/tag the Milestone 0 documents and begin Milestone 1
   only with explicit owner approval.
+
+Milestone 1 implementation is tracked in
+`docs/event-day-signs-milestone-1-checklist.md`; its staging and Linux-CI gates
+remain open before production use.
 
 ## Baseline verification record
 
