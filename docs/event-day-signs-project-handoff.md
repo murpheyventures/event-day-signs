@@ -6,8 +6,8 @@ This document is the starting point for a new session.
 
 - Repository: `C:\Users\steph\Documents\Event Day Signs`
 - Branch: `main`
-- Last implementation commit: `9169b31 feat: add delivery catalog fulfillment foundation`
-- The Milestone 2 implementation has been committed and pushed to `origin/main`.
+- Last implementation commit: milestone 3 guarded Printify fulfillment adapter (see git log).
+- Milestone 3 implementation is ready to commit and push to `origin/main`.
 - No production migration, deployment, provider credential, or live Printify submission has been performed.
 
 ## Completed milestones
@@ -21,15 +21,23 @@ This document is the starting point for a new session.
 - **Milestone 2:** versioned digital bundles/assets, printed-offer mapping records,
   idempotent fulfillment jobs, fulfillment provider port, and public IDs for the
   new records. See `docs/event-day-signs-milestone-2-checklist.md`.
+- **Milestone 3:** guarded Printify adapter and provider-status mapping. See
+  `docs/event-day-signs-milestone-3-checklist.md`.
 
 ## Validation record
 
 - Focused Milestone 2/catalog/public-ID tests: passed (19 tests in the final focused run).
+- Focused Milestone 3 fulfillment tests: passed (8 tests, including the disabled-by-default
+  Printify submission guard, request mapping, and status mapping).
+- `astro check` with telemetry disabled: passed with 0 errors and 2 pre-existing hints.
 - `git diff --check`: passed.
 - Full `npm run verify`: currently blocked by known baseline issues on this Windows
   environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
   boundary test has Windows path handling failures. These failures predate Milestone 2.
 - The Milestone 2 migration has not yet been applied to staging D1.
+- The Printify adapter is intentionally not wired to runtime settings yet; do not enable
+  provider submission until staging credentials, mapping persistence, and an explicit
+  no-live-submit operational guard are in place.
 
 ## Next session: resume here
 
@@ -38,9 +46,10 @@ This document is the starting point for a new session.
 3. Create a published digital bundle and verify that only approved assets resolve.
 4. Create a printed offer mapping and verify that no provider submission occurs.
 5. Verify duplicate fulfillment attempts reuse the same idempotency key/job.
-6. Configure a staging-only Printify adapter and an explicit no-live-submit guard
-   before implementing provider submission.
-7. Run the complete verification suite in Linux CI or another supported environment.
+6. Wire Printify settings and persistence only after staging-only credentials are
+   available; keep the explicit no-live-submit guard disabled by default.
+7. Run one explicitly authorized provider test order, then reconcile its status.
+8. Run the complete verification suite in Linux CI or another supported environment.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
 after meaningful changes, keep migrations additive, keep payment and fulfillment
