@@ -27,6 +27,10 @@ export const PUBLIC_ID_PREFIXES = {
   design: 'des',
   designVariant: 'dvar',
   offer: 'off',
+  digitalBundle: 'dbnd',
+  bundleAsset: 'bast',
+  printMapping: 'pmap',
+  fulfillmentJob: 'fjob',
 } as const;
 
 export type PublicIdKind = keyof typeof PUBLIC_ID_PREFIXES;
