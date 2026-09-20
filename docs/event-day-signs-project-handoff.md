@@ -6,8 +6,8 @@ This document is the starting point for a new session.
 
 - Repository: `C:\Users\steph\Documents\Event Day Signs`
 - Branch: `main`
-- Last implementation commit: Milestone 4 bounded SEO/discovery surface (to be
-  created by the commit that accompanies this handoff).
+- Last implementation commit: Milestone 5 pricing foundation (to be created by
+  the commit that accompanies this handoff).
 - `origin/main` is synchronized before this handoff commit; push this commit to
   keep the remote continuation point current.
 - No production migration, deployment, provider credential, or live Printify submission has been performed.
@@ -28,6 +28,10 @@ This document is the starting point for a new session.
 - **Milestone 4:** bounded `llms.txt` discovery index with the paginated JSON
   catalog as the complete feed, canonical discovery links, and pure unit
   coverage. See `docs/event-day-signs-milestone-4-checklist.md`.
+- **Milestone 5 foundation:** additive pricing-rule and membership-plan schema,
+  plus a pure member-price resolver with precedence, effective dates, format
+  filtering, and contribution-floor protection. See
+  `docs/event-day-signs-milestone-5-checklist.md`.
 
 ## Validation record
 
@@ -38,6 +42,8 @@ This document is the starting point for a new session.
 - `git diff --check`: passed.
 - Milestone 4 focused discovery tests: passed (2 tests).
 - `astro check` after Milestone 4: passed with 0 errors and 2 pre-existing hints.
+- Milestone 5 pricing foundation tests: passed (3 tests).
+- `astro check` after Milestone 5 foundation: passed with 0 errors and 2 pre-existing hints.
 - Full `npm run verify`: currently blocked by known baseline issues on this Windows
   environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
   boundary test has Windows path handling failures. These failures predate Milestone 2.
@@ -48,6 +54,10 @@ This document is the starting point for a new session.
 - The normalized catalog and delivery tables are foundation-only. Digital bundle
   completeness for every approved variant and size, printed size/colorway
   selection, order snapshotting, and checkout integration remain open.
+- The roadmap-defined Printify/ready-by work in
+  `docs/event-day-signs-milestones-4-10-architecture.md` remains open; the
+  current Milestone 4 checklist records the separate SEO/discovery slice that
+  was implemented.
 
 ## Next session: resume here
 
@@ -63,7 +73,9 @@ This document is the starting point for a new session.
 9. Verify Milestone 4's bounded output against a staging catalog larger than 50
    products and confirm that the complete paginated JSON feed maps to canonical
    sitemap URLs.
-10. Do not skip the open Milestone 1–3 staging gates while continuing later
+10. Resolve Milestone 5 owner decisions, then add Stripe membership state,
+    event handling, admin configuration, and checkout integration.
+11. Do not skip the open Milestone 1–4 staging gates while continuing later
     milestones.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
