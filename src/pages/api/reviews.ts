@@ -1,8 +1,15 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import { submitVerifiedReview, type ReviewFormat } from '../../features/reviews/db';
+import { listApprovedReviews, reviewSummary, submitVerifiedReview, type ReviewFormat } from '../../features/reviews/db';
 
 export const prerender = false;
+
+export const GET: APIRoute = async ({ url }) => {
+  const designId = Number(url.searchParams.get('design_id'));
+  if (!Number.isInteger(designId) || designId < 1) return Response.json({ error: 'A valid design_id is required.' }, { status: 400 });
+  const [reviews, summary] = await Promise.all([listApprovedReviews(env.DB, designId), reviewSummary(env.DB, designId)]);
+  return Response.json({ design_id: designId, summary, reviews });
+};
 
 export const POST: APIRoute = async ({ request }) => {
   if (!(request.headers.get('content-type') ?? '').includes('application/json')) {

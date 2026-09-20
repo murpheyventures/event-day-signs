@@ -11,6 +11,8 @@ Scope: native verified-purchase reviews attached to normalized designs
   moderation state, and approved-review reads.
 - [x] Add the protected moderation list, approve/reject/hide actions, merchant
   responses, audit entries, and approved-review aggregate queries.
+- [x] Add an approved-only public JSON projection with rating aggregates for
+  normalized design IDs.
 
 ## Remaining
 
