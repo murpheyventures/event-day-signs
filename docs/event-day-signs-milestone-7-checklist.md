@@ -25,3 +25,17 @@ and normalized catalog projection foundation.
 - [x] Align MCP buyer projections with the public normalized catalog contract.
 - [ ] Validate representative JSON-LD with Schema.org and Rich Results tooling.
 - [ ] Run supported-environment integration and staging verification.
+
+## Operational verification attempt — 2026-09-20
+
+- [x] Confirm the staging Worker is reachable at
+  `https://event-day-signs-staging.stephen-8cc.workers.dev/`.
+- [x] Confirm the published staging product page renders the supplied test
+  product, both printed sizes, and the purchase controls.
+- [ ] Deploy commit `70c9403` to staging and verify the new API, feed, sitemap,
+  robots, noindex, and JSON-LD outputs.
+
+The remaining checks are blocked because `wrangler whoami` reports that the
+stored Cloudflare authentication has expired, and no `CLOUDFLARE_API_TOKEN` or
+`.dev.vars` credentials are present. No remote migration or staging deploy was
+performed during this attempt.

@@ -103,6 +103,11 @@ This document is the starting point for a new session.
   `0003` and `0039` were applied through Wrangler's direct file-execution
   workaround, then recorded in the migration ledger because the remote
   migration runner has a known trigger-splitting parser bug.
+- Milestone 7 staging verification was attempted on 2026-09-20. The public
+  staging Worker and published test product page are reachable and render the
+  expected product controls. Deployment of commit `70c9403` and direct
+  endpoint verification are still pending because Wrangler authentication has
+  expired and no `CLOUDFLARE_API_TOKEN` or `.dev.vars` credentials are present.
 - The Printify adapter is intentionally not wired to runtime settings yet; do not enable
   provider submission until staging credentials, mapping persistence, and an explicit
   no-live-submit operational guard are in place.
@@ -153,6 +158,11 @@ This document is the starting point for a new session.
 16. Run Milestone 7 JSON-LD/schema validation and the full integration/MCP gate
    in Linux CI or another supported environment before treating the milestone
    as operationally accepted.
+17. Reauthenticate Wrangler (`wrangler login`) or provide a scoped
+   `CLOUDFLARE_API_TOKEN`, deploy commit `70c9403` to the dedicated staging
+   Worker, then verify `/api/products`, `/llms.txt`, `/sitemap.xml`,
+   `/robots.txt`, `/feed/google.xml`, noindex routes, and normalized-design
+   JSON-LD. Do not run remote migrations unless a schema change requires it.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
 after meaningful changes, keep migrations additive, keep payment and fulfillment
