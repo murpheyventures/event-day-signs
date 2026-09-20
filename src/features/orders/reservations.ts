@@ -34,6 +34,7 @@ interface ReservationRow {
   status: ReservationStatus;
   expires_at: string;
   terminal_at: string | null;
+  membership_snapshot_json: string | null;
 }
 
 interface StockTarget {
@@ -286,6 +287,7 @@ export async function reserveInventory(
   paymentMethod: 'stripe' | 'opennode' | 'lightning' | 'demo',
   purger?: StockTransitionPurger,
   release: DigitalDeliveryRelease = DIGITAL_DELIVERY_RELEASE,
+  membershipSnapshotJson: string | null = null,
 ): Promise<boolean> {
   if (items.length === 0 || !Number.isInteger(ttlSeconds) || ttlSeconds < 60) return false;
   await releaseExpiredReservations(db, 50, purger);
@@ -323,13 +325,13 @@ export async function reserveInventory(
 
     const insert = db
       .prepare(
-        `INSERT INTO checkout_reservations (public_id, items, payment_method, expires_at)
-         SELECT ?, ?, ?, datetime('now', ?)
+        `INSERT INTO checkout_reservations (public_id, items, payment_method, expires_at, membership_snapshot_json)
+         SELECT ?, ?, ?, datetime('now', ?), ?
           WHERE ${checks.join(' AND ')}
          ON CONFLICT(public_id) DO NOTHING
          RETURNING public_id`,
       )
-      .bind(publicId, JSON.stringify(claimedItems), paymentMethod, `+${ttlSeconds} seconds`, ...checkValues);
+      .bind(publicId, JSON.stringify(claimedItems), paymentMethod, `+${ttlSeconds} seconds`, membershipSnapshotJson, ...checkValues);
     // Release 1 writes no claims, so the decrement results sit at a different
     // offset there. Index off the statements actually batched, never off the
     // item count — getting this wrong silently skips every stock purge.
@@ -396,6 +398,7 @@ export async function getActiveReservationItems(
 export interface SettlementReservation {
   items: ReservationItem[];
   status: ReservationStatus;
+  membershipSnapshotJson: string | null;
 }
 
 /** Load an authoritative snapshot for ordinary or late settlement. */
@@ -406,7 +409,7 @@ export async function getSettlementReservation(
   const row = await getReservation(db, publicId);
   if (!row || !['active', 'payment_pending', 'expired', 'failed'].includes(row.status)) return null;
   const items = parseItems(row.items);
-  return items ? { items, status: row.status } : null;
+  return items ? { items, status: row.status, membershipSnapshotJson: row.membership_snapshot_json } : null;
 }
 
 /** Snapshot used by the unadvertised machine-readable status route. */
@@ -417,7 +420,7 @@ export async function getReservationStatusSnapshot(
   const row = await getReservation(db, publicId);
   if (!row) return null;
   const items = parseItems(row.items);
-  return items ? { items, status: row.status } : null;
+  return items ? { items, status: row.status, membershipSnapshotJson: row.membership_snapshot_json } : null;
 }
 
 /** Protect a delayed payment from ordinary hosted-session expiry reclamation. */

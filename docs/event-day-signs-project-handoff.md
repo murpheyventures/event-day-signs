@@ -72,6 +72,10 @@ This document is the starting point for a new session.
   options.
 - Normal staging checkout reaches Stripe Checkout. Membership-price and signed
   webhook end-to-end verification remain open.
+- Authenticated cart checkout now resolves active membership and enabled pricing
+  rules on the server, stores the member-price decision in the reservation, and
+  snapshots it onto the settled order. Guest and buy-now flows remain at base
+  price until identity is available.
 - Full `npm run verify`: currently blocked by known baseline issues on this Windows
   environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
   boundary test has Windows path handling failures. These failures predate Milestone 2.
@@ -116,8 +120,10 @@ This document is the starting point for a new session.
    products and confirm that the complete paginated JSON feed maps to canonical
    sitemap URLs.
 12. Resolve the remaining Milestone 5 owner decisions and finish member-price
-    snapshots plus server-side cart/checkout integration.
-13. Do not skip the open Milestone 1–4 staging gates while continuing later
+    messaging for buy-now/guest flows plus the combined join-and-save checkout.
+13. Begin Milestone 6 with verified-purchase reviews, while retaining the open
+    Milestone 5 staging and policy gates.
+14. Do not skip the open Milestone 1–4 staging gates while continuing later
    milestones.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`

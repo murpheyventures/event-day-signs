@@ -11,6 +11,7 @@ import { shippingFor } from '../features/shipping/effective';
 import { shipmentWeightFor } from '../features/shipping/lines';
 import { stripeDestination } from '../features/shipping/destination';
 import { readCart, resolveCart } from '../features/cart/cart';
+import { getCustomerEmail } from '../features/auth/customer';
 import { enabledMethods } from '../features/payments';
 import ProductImage from '../features/products/ProductImage.astro';
 
@@ -87,7 +88,7 @@ if (isBuyNow && productPublicId) {
     if (e.public_id) carry.push({ name: 'extra', value: e.public_id });
   }
 } else {
-  const { lines: cartLines } = await resolveCart(env.DB, readCart(Astro.cookies));
+  const { lines: cartLines } = await resolveCart(env.DB, readCart(Astro.cookies), await getCustomerEmail(Astro.cookies));
   if (cartLines.length === 0) return Astro.redirect('/cart', 303);
   // Stock can drop between adding to the cart and checking out. Bounce to the cart
   // rather than rendering a total the shopper can't actually buy: this page has no

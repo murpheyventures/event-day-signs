@@ -108,6 +108,7 @@ export async function recordPaidWebhookOrder(
     paidOrder = {
       ...paidOrder,
       items: reservation.items,
+      membershipSnapshotJson: reservation.membershipSnapshotJson,
       reservationStatus:
         reservation.status === 'active' || reservation.status === 'payment_pending'
           ? reservation.status

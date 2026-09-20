@@ -8,6 +8,7 @@ import {
   type ProductExtra,
 } from '../products/variants';
 import { parseCartKey, lineUnitPriceCents } from './key';
+import { priceLinesForMember, type MembershipBenefitSnapshot } from '../pricing/db';
 
 const COOKIE = 'cart';
 /** Script-readable item count (see writeCart). Mirrors COOKIE's lifetime. */
@@ -33,6 +34,8 @@ export interface CartLine {
   unitPriceCents: number; // variant/base + selected extras
   lineTotalCents: number;
   availableStock: number; // variant stock when a variant, else product stock
+  memberSavingsCents: number;
+  memberRuleId: string | number | null;
 }
 
 export function readCart(cookies: AstroCookies): Cart {
@@ -99,12 +102,13 @@ export function cartCount(cart: Cart): number {
 export async function resolveCart(
   db: D1Database,
   cart: Cart,
-): Promise<{ lines: CartLine[]; subtotalCents: number }> {
+  customerEmail: string | null = null,
+): Promise<{ lines: CartLine[]; subtotalCents: number; membershipSnapshot: MembershipBenefitSnapshot | null }> {
   const requested = Object.entries(cart).flatMap(([key, qty]) => {
     const parsed = parseCartKey(key);
     return parsed ? [{ key, qty, parsed }] : [];
   });
-  if (requested.length === 0) return { lines: [], subtotalCents: 0 };
+  if (requested.length === 0) return { lines: [], subtotalCents: 0, membershipSnapshot: null };
 
   const [products, variants, extras] = await Promise.all([
     getProductsByPublicIds(db, [...new Set(requested.map((line) => line.parsed.productPublicId))]),
@@ -152,10 +156,24 @@ export async function resolveCart(
       unitPriceCents,
       lineTotalCents: unitPriceCents * qty,
       availableStock: variant ? variant.stock : product.stock,
+      memberSavingsCents: 0,
+      memberRuleId: null,
     });
   }
-  const subtotalCents = lines.reduce((sum, l) => sum + l.lineTotalCents, 0);
-  return { lines, subtotalCents };
+  const priced = await priceLinesForMember(
+    db,
+    lines.map((line) => ({ ...line, productId: line.product.id, format: line.product.requires_shipping ? 'printed' as const : 'digital' as const, quantity: line.qty })),
+    customerEmail,
+  );
+  const pricedLines = priced.lines.map(({ line, memberPriceCents, savingsCents, ruleId }) => ({
+    ...line,
+    unitPriceCents: memberPriceCents,
+    lineTotalCents: memberPriceCents * line.qty,
+    memberSavingsCents: savingsCents,
+    memberRuleId: ruleId,
+  }));
+  const subtotalCents = pricedLines.reduce((sum, l) => sum + l.lineTotalCents, 0);
+  return { lines: pricedLines, subtotalCents, membershipSnapshot: priced.snapshot };
 }
 
 export const CART_QTY_MAX = MAX_QTY;

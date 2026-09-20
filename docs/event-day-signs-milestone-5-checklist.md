@@ -22,6 +22,9 @@ Scope: deterministic category/member pricing and membership plan configuration
 - [x] Apply migration 0043 to staging.
 - [x] Fix credential-only settings saves so a cache-purge failure cannot report
   a successfully stored Stripe secret as a failed save.
+- [x] Apply server-authoritative member pricing for authenticated cart checkout,
+  persist the resolved benefit snapshot through reservation settlement, and keep
+  guest checkout behavior unchanged until customer identity is available.
 
 ## Remaining acceptance gates
 
@@ -43,3 +46,9 @@ Scope: deterministic category/member pricing and membership plan configuration
 No live Stripe payment change is part of this implementation step. Staging is
 still intentionally limited to Stripe test mode and must not submit orders to
 Printify.
+
+Implementation note: the authenticated cart path is now wired end to end. A
+future checkout UX pass may add member-price messaging to buy-now and signed-out
+guest flows after the owner decides whether membership must be purchased in the
+same checkout; those choices do not affect the current reservation/settlement
+architecture.

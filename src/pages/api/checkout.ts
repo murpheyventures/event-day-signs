@@ -41,6 +41,7 @@ import { purgeStockProductCache } from '../../features/cache/purge';
 import { lifecycleActive } from '../../features/digitalDelivery/rollout.ts';
 import { mintLightningOrder } from '../../features/payments/lightning-provider';
 import { getLightningBackend } from '../../features/payments/lightning';
+import { getCustomerEmail } from '../../features/auth/customer';
 
 export const prerender = false;
 
@@ -123,6 +124,7 @@ export const POST: APIRoute = async ({ request, cookies, url, redirect }) => {
   const origin = url.origin;
 
   let lines: LineDraft[] = [];
+  let membershipSnapshotJson: string | null = null;
   let cancelUrl = `${origin}/`;
   // Where to send the shopper if a stock check fails (cart, or the product).
   let errorPath = '/cart';
@@ -176,7 +178,9 @@ export const POST: APIRoute = async ({ request, cookies, url, redirect }) => {
     cancelUrl = `${origin}/products/${product.slug}?canceled=1`;
     errorPath = `/products/${product.slug}`;
   } else {
-    const { lines: cartLines } = await resolveCart(env.DB, readCart(cookies));
+    const resolvedCart = await resolveCart(env.DB, readCart(cookies), await getCustomerEmail(cookies));
+    const cartLines = resolvedCart.lines;
+    membershipSnapshotJson = resolvedCart.membershipSnapshot ? JSON.stringify(resolvedCart.membershipSnapshot) : null;
     lines = cartLines.map((l) => ({
       product: l.product,
       qty: l.qty,
@@ -369,6 +373,8 @@ export const POST: APIRoute = async ({ request, cookies, url, redirect }) => {
     reservationTtlSeconds(selected),
     selected,
     purgeStockProductCache,
+    undefined,
+    membershipSnapshotJson,
   );
   if (!reserved) {
     await deleteGuestAccessIfUnsettled(env.DB, publicId);

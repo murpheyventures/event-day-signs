@@ -4,6 +4,7 @@ import { env } from 'cloudflare:workers';
 import Layout from '../layouts/Layout.astro';
 import { getConfig, formatPrice } from '../config';
 import { readCart, resolveCart } from '../features/cart/cart';
+import { getCustomerEmail } from '../features/auth/customer';
 import { getProductByPublicId, type Product } from '../features/products/db';
 import { listVariants, getExtrasByPublicIds, type ProductVariant } from '../features/products/variants';
 import { parsePublicId } from '../features/ids/publicId';
@@ -83,6 +84,7 @@ interface CheckoutLine {
   variant: ProductVariant | null;
 }
 let lines: CheckoutLine[] = [];
+let membershipSnapshotJson: string | null = null;
 if (productPublicId) {
   const product = await getProductByPublicId(env.DB, productPublicId);
   if (product && product.active) {
@@ -109,7 +111,9 @@ if (productPublicId) {
     ];
   }
 } else {
-  const { lines: cartLines } = await resolveCart(env.DB, readCart(Astro.cookies));
+  const resolvedCart = await resolveCart(env.DB, readCart(Astro.cookies), await getCustomerEmail(Astro.cookies));
+  const cartLines = resolvedCart.lines;
+  membershipSnapshotJson = resolvedCart.membershipSnapshot ? JSON.stringify(resolvedCart.membershipSnapshot) : null;
   lines = cartLines.map((l) => ({
     product: l.product,
     qty: l.qty,
@@ -267,6 +271,8 @@ if (submitted) {
             reservationTtl,
             rail,
             purgeStockProductCache,
+            undefined,
+            membershipSnapshotJson,
           );
           if (!reserved) {
             await deleteGuestAccessIfUnsettled(env.DB, publicId);

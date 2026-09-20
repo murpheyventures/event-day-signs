@@ -184,6 +184,7 @@ export interface PaidOrderInput {
    * so a payment is never marked settled unless ITS order row actually landed.
    */
   settlePaymentHash?: string | null;
+  membershipSnapshotJson?: string | null;
 }
 
 /**
@@ -492,8 +493,8 @@ export async function recordPaidOrder(
   const insertOrder = o.reservationId
     ? db
         .prepare(
-          `INSERT INTO orders (provider_session_id, public_id, email, amount_total_cents, shipping_cents, shipping_label, shipping_weight_grams, delivery_method, discount_cents, tax_cents, currency, ship_address, status, payment_method, settlement_token, provider_payment_id)
-           SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid', ?, NULL, ?
+          `INSERT INTO orders (provider_session_id, public_id, email, amount_total_cents, shipping_cents, shipping_label, shipping_weight_grams, delivery_method, discount_cents, tax_cents, currency, ship_address, status, payment_method, settlement_token, provider_payment_id, membership_snapshot_json)
+           SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid', ?, NULL, ?, ?
             WHERE EXISTS (
               SELECT 1 FROM checkout_reservations
                WHERE public_id = ? AND status IN ${settlementStatuses}
@@ -501,15 +502,15 @@ export async function recordPaidOrder(
            ON CONFLICT(provider_session_id) DO NOTHING
            RETURNING id`,
         )
-        .bind(...orderValues, o.reservationId)
+        .bind(...orderValues, o.membershipSnapshotJson ?? null, o.reservationId)
     : db
         .prepare(
-          `INSERT INTO orders (provider_session_id, public_id, email, amount_total_cents, shipping_cents, shipping_label, shipping_weight_grams, delivery_method, discount_cents, tax_cents, currency, ship_address, status, payment_method, settlement_token, provider_payment_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid', ?, NULL, ?)
+          `INSERT INTO orders (provider_session_id, public_id, email, amount_total_cents, shipping_cents, shipping_label, shipping_weight_grams, delivery_method, discount_cents, tax_cents, currency, ship_address, status, payment_method, settlement_token, provider_payment_id, membership_snapshot_json)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid', ?, NULL, ?, ?)
            ON CONFLICT(provider_session_id) DO NOTHING
            RETURNING id`,
         )
-        .bind(...orderValues);
+        .bind(...orderValues, o.membershipSnapshotJson ?? null);
   const stmts = [
     insertOrder,
     // Only one delivery can change NULL to its unique token. Every following
