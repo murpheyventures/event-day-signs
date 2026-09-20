@@ -8,6 +8,8 @@ import { resolveTheme } from './themes.mjs';
 import { executeDeployPlan } from './deploy-plan.mjs';
 
 const root = resolve(import.meta.dirname, '..');
+const bin = (name) =>
+  resolve(root, 'node_modules', '.bin', process.platform === 'win32' ? `${name}.cmd` : name);
 const args = process.argv.slice(2);
 const skipBuild = args.includes('--skip-build');
 const preflightOnly = args.includes('--preflight-only');
@@ -22,9 +24,11 @@ console.log(`Deploying theme: ${theme.id} (from ${theme.source})`);
 
 
 function run(command, args) {
-  const result = spawnSync(command, args, {
+  const executable = process.platform === 'win32' ? `"${command}"` : command;
+  const result = spawnSync(executable, args, {
     cwd: root,
     env: process.env,
+    shell: process.platform === 'win32',
     stdio: 'inherit',
   });
   if (result.error) throw result.error;
@@ -146,10 +150,10 @@ async function purgeAfterDeploy(origin, secret) {
 const ops = {
   expectedTheme: theme.id,
   readStamp: () => (existsSync(stampPath) ? readFileSync(stampPath, 'utf8') : null),
-  build: () => run('npx', ['astro', 'build']),
+  build: () => run(bin('astro'), ['build']),
   loadCacheConfig: () => deploymentCacheConfig(),
-  migrate: () => run('npx', ['wrangler', 'd1', 'migrations', 'apply', 'DB', '--remote']),
-  deploy: () => run('npx', ['wrangler', 'deploy']),
+  migrate: () => run(bin('wrangler'), ['d1', 'migrations', 'apply', 'DB', '--remote']),
+  deploy: () => run(bin('wrangler'), ['deploy']),
   purge: (cacheConfig) => purgeAfterDeploy(cacheConfig.origin, cacheConfig.secret),
 };
 
