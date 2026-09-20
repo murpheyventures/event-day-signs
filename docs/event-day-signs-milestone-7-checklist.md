@@ -1,6 +1,6 @@
 # Event Day Signs — Milestone 7 Checklist
 
-Status: implementation in progress; this commit delivers the structured-data
+Status: implementation complete; supported-environment validation remains an
 and normalized catalog projection foundation.
 
 ## Completed in this slice
@@ -19,9 +19,9 @@ and normalized catalog projection foundation.
 
 ## Remaining
 
-- [ ] Make normalized designs authoritative in paginated list/feed queries.
-- [ ] Add shared canonical/robots/noindex helpers and accurate sitemap lastmod.
-- [ ] Add Merchant Center and complete catalog feed projections.
-- [ ] Align MCP buyer projections with the public normalized catalog contract.
+- [x] Make normalized designs authoritative in paginated list/feed queries.
+- [x] Add shared canonical/robots/noindex helpers and accurate sitemap lastmod.
+- [x] Add Merchant Center and complete catalog feed projections.
+- [x] Align MCP buyer projections with the public normalized catalog contract.
 - [ ] Validate representative JSON-LD with Schema.org and Rich Results tooling.
 - [ ] Run supported-environment integration and staging verification.

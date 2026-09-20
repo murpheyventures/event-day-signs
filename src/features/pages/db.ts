@@ -17,6 +17,7 @@ export interface Page {
 export interface PageLink {
   title: string;
   slug: string;
+  updated_at?: string;
 }
 
 /**
@@ -67,7 +68,7 @@ export async function listPublishedPageLinks(db: D1Database): Promise<PageLink[]
 /** Every published page, for the sitemap and llms.txt (no footer cap). */
 export async function listPublishedPages(db: D1Database): Promise<PageLink[]> {
   const { results } = await db
-    .prepare('SELECT title, slug FROM pages WHERE published = 1 ORDER BY title COLLATE NOCASE, id')
+    .prepare('SELECT title, slug, updated_at FROM pages WHERE published = 1 ORDER BY title COLLATE NOCASE, id')
     .all<PageLink>();
   return results ?? [];
 }

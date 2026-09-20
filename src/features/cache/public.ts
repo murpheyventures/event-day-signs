@@ -19,6 +19,7 @@ export function isPublicStorefrontPath(pathname: string): boolean {
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml' ||
     pathname === '/llms.txt'
+    || pathname === '/feed/google.xml'
   );
 }
 

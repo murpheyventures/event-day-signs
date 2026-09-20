@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { PUBLIC_CACHE_CONTROL } from '../features/cache/public';
 import { getConfig, formatPrice } from '../config';
-import { listProducts, countProducts } from '../features/products/db';
+import { listPublicCatalog } from '../features/catalog/public';
 import { listCategories } from '../features/categories/db';
 import { listPublishedPages } from '../features/pages/db';
 import { publicOrigin } from '../features/http/origin';
@@ -17,9 +17,10 @@ const DISCOVERY_PRODUCT_LIMIT = 50;
 export const GET: APIRoute = async ({ url }) => {
   const origin = publicOrigin(url.origin, env.CANONICAL_ORIGIN);
   const { storeName, currency } = getConfig();
-  const [total, products, categories, pages] = await Promise.all([
-    countProducts(env.DB),
-    listProducts(env.DB, DISCOVERY_PRODUCT_LIMIT, 0),
+  const mcpUrl = (env.MCP_URL ?? '').trim();
+  const advertisedMcpUrl = env.MCP_URL ? mcpUrl : '';
+  const [catalog, categories, pages] = await Promise.all([
+    listPublicCatalog(env.DB, origin, getConfig().images.baseUrl, DISCOVERY_PRODUCT_LIMIT, 0),
     listCategories(env.DB),
     listPublishedPages(env.DB),
   ]);
@@ -28,11 +29,11 @@ export const GET: APIRoute = async ({ url }) => {
     storeName,
     currency,
     origin,
-    totalProducts: total,
-    products: products.map((product) => ({
+    totalProducts: catalog.total,
+    products: catalog.products.map((product) => ({
       name: product.name,
       slug: product.slug,
-      price: formatPrice(product.price_cents, currency),
+      price: formatPrice(product.price.cents, product.price.currency),
       description: product.description,
     })),
     categories: categories.map((category) => ({
@@ -43,7 +44,7 @@ export const GET: APIRoute = async ({ url }) => {
       label: page.title,
       href: `${origin}/pages/${page.slug}`,
     })),
-    mcpUrl: env.MCP_URL,
+    mcpUrl: advertisedMcpUrl,
   });
 
   return new Response(body, {

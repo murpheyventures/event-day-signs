@@ -67,6 +67,10 @@ This document is the starting point for a new session.
   offer formats and delivery metadata, and normalized design pages emit shared
   `ProductGroup` structured data with approved review aggregates. See
   `docs/event-day-signs-milestone-7-checklist.md`.
+- **Milestone 7 implementation:** the public catalog now unions legacy products
+  and published normalized designs for pagination, llms.txt, and the Merchant
+  Center feed; shared indexing/canonical helpers and sitemap lastmod output are
+  in place. Supported-environment validation remains open.
 
 ## Validation record
 
@@ -146,6 +150,9 @@ This document is the starting point for a new session.
    milestones.
 15. Continue Milestone 7 with normalized-design pagination, canonical/noindex
    helpers, lastmod-aware sitemap/feed output, and MCP projection alignment.
+16. Run Milestone 7 JSON-LD/schema validation and the full integration/MCP gate
+   in Linux CI or another supported environment before treating the milestone
+   as operationally accepted.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
 after meaningful changes, keep migrations additive, keep payment and fulfillment

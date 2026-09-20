@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sitemapLocs } from './sitemap.xml';
+import { sitemapEntries, sitemapLocs } from '../features/seo/sitemap';
 
 const origin = 'https://shop.example';
 const data = {
@@ -37,5 +37,19 @@ describe('sitemapLocs', () => {
       const locs = sitemapLocs(origin, home, data);
       expect(new Set(locs).size).toBe(locs.length);
     }
+  });
+});
+
+describe('sitemapEntries', () => {
+  it('adds lastmod and deduplicates legacy and normalized design URLs', () => {
+    const entries = sitemapEntries(origin, null, {
+      categories: [],
+      products: [{ slug: 'beanie', created_at: '2026-09-01' }],
+      designs: [{ slug: 'beanie', updated_at: '2026-09-20' }],
+      pages: [{ slug: 'about', updated_at: '2026-09-10' }],
+    });
+    expect(entries).toContainEqual({ loc: `${origin}/products/beanie`, lastmod: '2026-09-01' });
+    expect(entries.filter((entry) => entry.loc.endsWith('/beanie'))).toHaveLength(1);
+    expect(entries.find((entry) => entry.loc.endsWith('/about'))?.lastmod).toBe('2026-09-10');
   });
 });

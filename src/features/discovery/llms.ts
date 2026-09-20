@@ -62,5 +62,6 @@ ${pageLines.length > 0 ? `\n## Pages\n${pageLines.join('\n')}\n` : ''}
 - [Create a checkout](${input.origin}/api/checkout): \`POST\` JSON with catalog public IDs; pricing and stock are resolved server-side.
 - [Search the catalog](${input.origin}/search?q=): append a query, e.g. \`/search?q=leather\`.
 - [Sitemap](${input.origin}/sitemap.xml): every canonical product, category, and page URL.${mcpLine}
+- [Merchant Center feed](${input.origin}/feed/google.xml): XML product feed with offer-level availability and price.
 `;
 }

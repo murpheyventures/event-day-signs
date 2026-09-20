@@ -6,6 +6,8 @@ import { normalizeSearchQuery } from '../features/search/query';
 import { EMPTY_MENUS, visibleItems } from '../features/navigation/db';
 import { getEmailProvider } from '../features/email';
 import { buildShellModel } from '../features/storefront/shell';
+import { robotsContent } from '../features/seo/indexing';
+import { canonicalUrl } from '../features/seo/urls';
 import StoreHeader from '#theme/Header.astro';
 import StoreFooter from '#theme/Footer.astro';
 import '../styles/global.css';
@@ -64,8 +66,9 @@ const query =
 
 const desc = (description ?? `Shop ${storeName}.`).slice(0, 160);
 const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
-const canonical = canonicalOverride ?? new URL(Astro.url.pathname, origin).href;
+const canonical = canonicalUrl(origin, Astro.url.pathname, canonicalOverride);
 const ogImage = image ? new URL(image, origin).href : undefined;
+const robots = robotsContent(Astro.url.pathname);
 
 // The header and footer are store-owned, so they receive a model rather than
 // request context. Built from values middleware already loaded — no extra D1
@@ -99,6 +102,7 @@ const shell = buildShellModel({
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <title>{pageTitle}</title>
     <meta name="description" content={desc} />
+    {robots && <meta name="robots" content={robots} />}
     <link rel="canonical" href={canonical} />
 
     <meta property="og:type" content="website" />

@@ -10,6 +10,11 @@ export const GET: APIRoute = ({ url }) => {
 Allow: /
 Disallow: /admin
 Disallow: /api/
+Disallow: /search
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
+Disallow: /pay/
 Sitemap: ${origin}/sitemap.xml
 `;
   return new Response(body, {

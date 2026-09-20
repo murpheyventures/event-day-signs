@@ -4,6 +4,7 @@ import { env } from 'cloudflare:workers';
 import { listProducts, countProducts } from '../features/products/db';
 import { listCategories } from '../features/categories/db';
 import { listPublishedPages } from '../features/pages/db';
+import { listPublishedDesigns } from '../features/catalog/db';
 import { catalogPath } from '../features/settings/home';
 import { publicOrigin } from '../features/http/origin';
 
@@ -38,6 +39,38 @@ export function sitemapLocs(
   ];
 }
 
+export interface SitemapEntry {
+  loc: string;
+  lastmod?: string;
+}
+
+export function sitemapEntries(
+  origin: string,
+  homePage: string | null | undefined,
+  data: {
+    categories: { slug: string; created_at?: string }[];
+    products: { slug: string; created_at?: string }[];
+    pages: { slug: string; updated_at?: string }[];
+    designs?: { slug: string; updated_at?: string }[];
+  },
+): SitemapEntry[] {
+  const entries: SitemapEntry[] = [
+    { loc: `${origin}${catalogPath(homePage)}` },
+    ...data.categories.map((item) => ({ loc: `${origin}/categories/${item.slug}`, lastmod: item.created_at })),
+    ...data.products.map((item) => ({ loc: `${origin}/products/${item.slug}`, lastmod: item.created_at })),
+    ...(data.designs ?? []).map((item) => ({ loc: `${origin}/products/${item.slug}`, lastmod: item.updated_at })),
+    ...data.pages.map((item) => ({ loc: `${origin}/pages/${item.slug}`, lastmod: item.updated_at })),
+  ];
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry.loc)) return false;
+    seen.add(entry.loc);
+    return true;
+  });
+}
+
+const xml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+
 // Dynamic sitemap: storefront + every active product, category, and published page. Slugs are
 // URL-safe (a-z0-9-), so no XML escaping is needed.
 export const GET: APIRoute = async ({ url, locals }) => {
@@ -46,12 +79,18 @@ export const GET: APIRoute = async ({ url, locals }) => {
   const products = total > 0 ? await listProducts(env.DB, total, 0) : [];
   const categories = await listCategories(env.DB);
   const pages = await listPublishedPages(env.DB);
+  let designs: Array<{ slug: string; updated_at?: string }> = [];
+  try {
+    designs = await listPublishedDesigns(env.DB);
+  } catch (error) {
+    if (!(error instanceof Error && /no such table: designs/i.test(error.message))) throw error;
+  }
 
-  const locs = sitemapLocs(origin, locals.settings?.homePage, { categories, products, pages });
+  const entries = sitemapEntries(origin, locals.settings?.homePage, { categories, products, pages, designs });
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${locs.map((l) => `  <url><loc>${l}</loc></url>`).join('\n')}
+${entries.map((entry) => `  <url><loc>${xml(entry.loc)}</loc>${entry.lastmod ? `<lastmod>${xml(entry.lastmod)}</lastmod>` : ''}</url>`).join('\n')}
 </urlset>
 `;
 

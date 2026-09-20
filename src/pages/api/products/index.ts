@@ -1,9 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import { listProducts, countProducts } from '../../../features/products/db';
-import { categoriesForProducts } from '../../../features/categories/db';
-import { getSearchProvider } from '../../../features/search';
-import { toCatalogProduct } from '../../../features/catalog/serialize';
+import { listPublicCatalog } from '../../../features/catalog/public';
 import { catalogJson, catalogPreflight } from '../../../features/catalog/http';
 import { parseCatalogListQuery } from '../../../features/catalog/query';
 import { getConfig } from '../../../config';
@@ -25,32 +22,10 @@ export const GET: APIRoute = async ({ url }) => {
   const { query: q, limit, offset } = parseCatalogListQuery(url.searchParams);
   const origin = publicOrigin(url.origin, env.CANONICAL_ORIGIN);
 
-  let page;
-  let total;
-  if (q) {
-    const result = await (await getSearchProvider()).search(q, { limit, offset });
-    total = result.total;
-    page = result.products;
-  } else {
-    page = await listProducts(env.DB, limit, offset);
-    total = await countProducts(env.DB);
-  }
-
   const imageBaseUrl = getConfig().images.baseUrl;
-  const categories = await categoriesForProducts(
-    env.DB,
-    page.map((p) => p.id),
-  );
-  const products = page.map((p) =>
-    toCatalogProduct(
-      p,
-      (categories.get(p.id) ?? []).map((c) => c.name),
-      origin,
-      { imageBaseUrl },
-    ),
-  );
+  const { products, total } = await listPublicCatalog(env.DB, origin, imageBaseUrl, limit, offset, q);
 
   const response = catalogJson({ products, total, limit, offset, query: q || null });
-  addCacheTags(response.headers, productCacheTags(page.map((product) => product.public_id)));
+  addCacheTags(response.headers, productCacheTags(products.map((product) => product.id)));
   return response;
 };
