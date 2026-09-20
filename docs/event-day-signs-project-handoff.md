@@ -6,8 +6,10 @@ This document is the starting point for a new session.
 
 - Repository: `C:\Users\steph\Documents\Event Day Signs`
 - Branch: `main`
-- Last implementation commit: `863781a` guarded Printify fulfillment adapter.
-- `origin/main` is synchronized with the local `main` branch.
+- Last implementation commit: Milestone 4 bounded SEO/discovery surface (to be
+  created by the commit that accompanies this handoff).
+- `origin/main` is synchronized before this handoff commit; push this commit to
+  keep the remote continuation point current.
 - No production migration, deployment, provider credential, or live Printify submission has been performed.
 
 ## Completed milestones
@@ -23,10 +25,9 @@ This document is the starting point for a new session.
   new records. See `docs/event-day-signs-milestone-2-checklist.md`.
 - **Milestone 3:** guarded Printify adapter and provider-status mapping. See
   `docs/event-day-signs-milestone-3-checklist.md`.
-- **Milestones 4–10 architecture:** continuation roadmap covering Printify
-  completion, ready-by estimates, membership/pricing, reviews, SEO/AEO/GEO,
-  theme, scale/AI/agentic-commerce spike, and final UAT. See
-  `docs/event-day-signs-milestones-4-10-architecture.md`.
+- **Milestone 4:** bounded `llms.txt` discovery index with the paginated JSON
+  catalog as the complete feed, canonical discovery links, and pure unit
+  coverage. See `docs/event-day-signs-milestone-4-checklist.md`.
 
 ## Validation record
 
@@ -35,6 +36,8 @@ This document is the starting point for a new session.
   Printify submission guard, request mapping, and status mapping).
 - `astro check` with telemetry disabled: passed with 0 errors and 2 pre-existing hints.
 - `git diff --check`: passed.
+- Milestone 4 focused discovery tests: passed (2 tests).
+- `astro check` after Milestone 4: passed with 0 errors and 2 pre-existing hints.
 - Full `npm run verify`: currently blocked by known baseline issues on this Windows
   environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
   boundary test has Windows path handling failures. These failures predate Milestone 2.
@@ -57,9 +60,11 @@ This document is the starting point for a new session.
    available; keep the explicit no-live-submit guard disabled by default.
 7. Run one explicitly authorized provider test order, then reconcile its status.
 8. Run the complete verification suite in Linux CI or another supported environment.
-9. Use `docs/event-day-signs-milestones-4-10-architecture.md` as the approved
-   roadmap. Do not skip the open Milestone 1–3 staging gates when beginning
-   Milestone 4.
+9. Verify Milestone 4's bounded output against a staging catalog larger than 50
+   products and confirm that the complete paginated JSON feed maps to canonical
+   sitemap URLs.
+10. Do not skip the open Milestone 1–3 staging gates while continuing later
+    milestones.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
 after meaningful changes, keep migrations additive, keep payment and fulfillment
