@@ -4,6 +4,8 @@ const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const ALLOWED = new Map<string, Set<string>>([
   ['application/pdf', new Set(['pdf'])],
   ['application/zip', new Set(['zip'])],
+  // Windows browsers commonly report .zip uploads as this legacy MIME type.
+  ['application/x-zip-compressed', new Set(['zip'])],
   ['application/epub+zip', new Set(['epub'])],
   ['audio/mpeg', new Set(['mp3'])],
   ['audio/mp4', new Set(['m4a'])],

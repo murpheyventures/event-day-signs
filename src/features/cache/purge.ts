@@ -18,6 +18,10 @@ function purgeFailure(
   );
 }
 
+function cacheIsDisabled(error: unknown): boolean {
+  return error instanceof Error && /cache(?:notenabled| not enabled)/i.test(error.message);
+}
+
 /**
  * Invalidate low-frequency content mutations synchronously after their D1
  * write. A failed tag purge falls back to the whole entrypoint cache; if that
@@ -35,6 +39,7 @@ export async function purgeCacheTags(
     if (result.success) return;
     purgeFailure('tags', result.errors);
   } catch (error) {
+    if (cacheIsDisabled(error)) return;
     purgeFailure('tags', error instanceof Error ? error.message : String(error));
   }
 
@@ -43,6 +48,7 @@ export async function purgeCacheTags(
     if (fallback.success) return;
     purgeFailure('everything', fallback.errors);
   } catch (error) {
+    if (cacheIsDisabled(error)) return;
     purgeFailure('everything', error instanceof Error ? error.message : String(error));
   }
 
