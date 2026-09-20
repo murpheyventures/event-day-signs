@@ -1,20 +1,19 @@
-/* Event Day Signs: bright race-day paper, ink-black type, and a signal orange
-   that stays reserved for the moment a shopper should act. */
+/* Event Day Signs: an energetic race-day palette built from the approved logo. */
 @theme {
-  --color-brand: #f05a28;
-  --color-brand-hover: #c94318;
-  --color-ink: #172026;
-  --color-accent: #0d6b78;
-  --color-paper: #fffaf0;
-  --color-line: #e7dccb;
+  --color-brand: #ff541f;
+  --color-brand-hover: #d94112;
+  --color-ink: #17122f;
+  --color-accent: #00afd0;
+  --color-paper: #fffdf8;
+  --color-line: #d8d1eb;
   --color-surface: #ffffff;
-  --color-muted: #53636a;
-  --color-faint: #718087;
+  --color-muted: #4a4562;
+  --color-faint: #716b87;
   --color-on-brand: #ffffff;
   --font-sans: 'Trebuchet MS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
-  --radius-md: 0.75rem;
-  --radius-lg: 1.25rem;
+  --font-serif: 'Arial Black', 'Trebuchet MS', ui-sans-serif, system-ui, sans-serif;
+  --radius-md: 0.65rem;
+  --radius-lg: 1rem;
 }
 
 :root {
@@ -28,9 +27,10 @@
   --prose-h2-size: 1.65rem;
   --prose-h2-tracking: -0.025em;
   --prose-h3-size: 1.15rem;
-  --eds-teal: #0d6b78;
-  --eds-yellow: #f4c542;
-  --eds-coral: #f05a28;
+  --eds-purple: #6a20d9;
+  --eds-teal: #00afd0;
+  --eds-yellow: #ffc51a;
+  --eds-coral: #ff541f;
 }
 
 @layer base {

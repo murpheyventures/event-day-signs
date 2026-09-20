@@ -14,7 +14,7 @@ const utility = 'text-xs font-bold uppercase tracking-[0.12em] text-muted hover:
 <header class="border-b-2 border-ink bg-paper">
   <div class="mx-auto flex max-w-[78rem] flex-wrap items-center gap-x-6 gap-y-4 px-5 py-5">
     <a href="/" aria-label={model.storeName} class="shrink-0">
-      {model.logo ? <img src={model.logo.src} alt={model.logo.alt} class="h-10 max-w-56 object-contain" /> : <span class="font-serif text-2xl font-bold tracking-tight text-ink sm:text-3xl">{model.storeName}</span>}
+      {model.logo ? <img src={model.logo.src} alt={model.logo.alt} class="h-14 w-auto max-w-[18rem] object-contain object-left" /> : <span role="img" aria-label={model.storeName} class="inline-block h-14 w-64 max-w-[18rem] overflow-hidden bg-contain bg-left bg-no-repeat text-[0]" style="background-image:url('/event-day-signs-logo.png')">{model.storeName}</span>}
     </a>
     <nav aria-label="Store" class="ml-auto flex items-center gap-4 sm:gap-6">
       <StoreNav links={model.headerLinks} class={`hidden items-center gap-5 lg:flex ${utility}`} disclosureClass={`relative lg:hidden ${utility}`} />
