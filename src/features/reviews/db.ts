@@ -105,3 +105,23 @@ export async function listApprovedReviews(
     .all<Review>();
   return results ?? [];
 }
+
+export async function listReviews(db: D1Database, state: ReviewModerationState | 'all' = 'all'): Promise<Review[]> {
+  const where = state === 'all' ? '' : ' WHERE moderation_state = ?';
+  const query = `SELECT * FROM reviews${where} ORDER BY created_at DESC, id DESC LIMIT 200`;
+  const result = state === 'all' ? await db.prepare(query).all<Review>() : await db.prepare(query).bind(state).all<Review>();
+  return result.results ?? [];
+}
+
+export async function moderateReview(db: D1Database, publicId: string, state: Exclude<ReviewModerationState, 'pending'>, merchantResponse?: string | null): Promise<boolean> {
+  const result = await db.prepare("UPDATE reviews SET moderation_state = ?, merchant_response = COALESCE(?, merchant_response), updated_at = datetime('now') WHERE public_id = ?").bind(state, merchantResponse?.trim() || null, publicId).run();
+  if ((result.meta.changes ?? 0) === 0) return false;
+  const row = await db.prepare('SELECT id FROM reviews WHERE public_id = ?').bind(publicId).first<{ id: number }>();
+  if (row) await db.prepare('INSERT INTO review_audit (review_id, action, details_json) VALUES (?, ?, ?)').bind(row.id, state, JSON.stringify({ merchantResponse: merchantResponse?.trim() || null })).run();
+  return true;
+}
+
+export async function reviewSummary(db: D1Database, designId: number): Promise<{ count: number; average: number | null }> {
+  const row = await db.prepare("SELECT COUNT(*) AS count, AVG(rating) AS average FROM reviews WHERE design_id = ? AND moderation_state = 'approved'").bind(designId).first<{ count: number; average: number | null }>();
+  return { count: row?.count ?? 0, average: row?.average ?? null };
+}

@@ -9,12 +9,14 @@ Scope: native verified-purchase reviews attached to normalized designs
 - [x] Add a repository that issues tokens only for paid order items.
 - [x] Add one-review-per-order-item enforcement, expiry, redemption, pending
   moderation state, and approved-review reads.
+- [x] Add the protected moderation list, approve/reject/hide actions, merchant
+  responses, audit entries, and approved-review aggregate queries.
 
 ## Remaining
 
-- [ ] Add review submission page/API and rate limiting.
+- [x] Add review submission page/API; rate limiting remains open.
 - [ ] Add review-request scheduling through the email outbox.
-- [ ] Add moderation/admin list, approve/reject/hide, merchant reply, and audit UI.
+- [x] Add moderation/admin list, approve/reject/hide, merchant reply, and audit UI.
 - [ ] Render approved reviews and aggregates on normalized design pages only.
 - [ ] Add abuse reports and the future customer-photo extension slot.
 - [ ] Decide moderation default, request timing, display-name policy, and any
