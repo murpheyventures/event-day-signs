@@ -1,7 +1,8 @@
 # Event Day Signs — Milestone 7 Checklist
 
-Status: implementation complete; supported-environment validation remains an
-and normalized catalog projection foundation.
+Status: implementation complete; Cloudflare staging verification completed on
+2026-09-20. External Schema/Rich Results validation and the supported Linux
+integration gate remain open.
 
 ## Completed in this slice
 
@@ -24,7 +25,8 @@ and normalized catalog projection foundation.
 - [x] Add Merchant Center and complete catalog feed projections.
 - [x] Align MCP buyer projections with the public normalized catalog contract.
 - [ ] Validate representative JSON-LD with Schema.org and Rich Results tooling.
-- [ ] Run supported-environment integration and staging verification.
+- [x] Complete Cloudflare staging verification; supported-environment integration
+  remains open.
 
 ## Operational verification attempt — 2026-09-20
 
@@ -32,10 +34,20 @@ and normalized catalog projection foundation.
   `https://event-day-signs-staging.stephen-8cc.workers.dev/`.
 - [x] Confirm the published staging product page renders the supplied test
   product, both printed sizes, and the purchase controls.
-- [ ] Deploy commit `70c9403` to staging and verify the new API, feed, sitemap,
-  robots, noindex, and JSON-LD outputs.
+- [x] Deploy the Milestone 7 build to the dedicated staging Worker. The final
+  deployed Worker version is `cb8ff5cc-78fc-4ad7-820a-a056312c96a0`.
+- [x] Apply the authorized staging-only migrations `0044`, `0045`, and `0046`.
+- [x] Verify `/api/products` returns the legacy product and normalized design
+  projections, including normalized offers and `source: "design"`.
+- [x] Verify the normalized design detail page returns HTTP 200 and emits
+  `ProductGroup` JSON-LD with canonical metadata.
+- [x] Verify `/llms.txt`, `/sitemap.xml`, `/robots.txt`, and
+  `/feed/google.xml`; the feed includes Google product namespace, price, and
+  availability, while the sitemap includes normalized URLs and `lastmod`.
+- [x] Verify `/search` and `/cart` return `noindex, nofollow` metadata.
+- [ ] Validate representative JSON-LD with Schema.org and Rich Results tooling.
 
-The remaining checks are blocked because `wrangler whoami` reports that the
-stored Cloudflare authentication has expired, and no `CLOUDFLARE_API_TOKEN` or
-`.dev.vars` credentials are present. No remote migration or staging deploy was
-performed during this attempt.
+The Cloudflare staging endpoint matrix passed after the migrations were
+applied. The remaining validation requires a supported external/schema tool or
+Linux CI; the local Windows `npm run verify` baseline remains documented in the
+project handoff.

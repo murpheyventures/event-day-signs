@@ -70,7 +70,9 @@ This document is the starting point for a new session.
 - **Milestone 7 implementation:** the public catalog now unions legacy products
   and published normalized designs for pagination, llms.txt, and the Merchant
   Center feed; shared indexing/canonical helpers and sitemap lastmod output are
-  in place. Supported-environment validation remains open.
+  in place. Cloudflare staging verification is complete; external
+  Schema/Rich Results validation and the supported Linux integration gate remain
+  open.
 
 ## Validation record
 
@@ -103,11 +105,14 @@ This document is the starting point for a new session.
   `0003` and `0039` were applied through Wrangler's direct file-execution
   workaround, then recorded in the migration ledger because the remote
   migration runner has a known trigger-splitting parser bug.
-- Milestone 7 staging verification was attempted on 2026-09-20. The public
-  staging Worker and published test product page are reachable and render the
-  expected product controls. Deployment of commit `70c9403` and direct
-  endpoint verification are still pending because Wrangler authentication has
-  expired and no `CLOUDFLARE_API_TOKEN` or `.dev.vars` credentials are present.
+- Milestone 7 staging verification completed on 2026-09-20 after Wrangler was
+  reauthenticated. The final deployment is Worker version
+  `cb8ff5cc-78fc-4ad7-820a-a056312c96a0` at
+  `https://event-day-signs-staging.stephen-8cc.workers.dev`. Authorized
+  staging-only migrations `0044`, `0045`, and `0046` are applied. The endpoint
+  matrix passed for `/api/products`, normalized product detail JSON-LD,
+  `/llms.txt`, `/sitemap.xml`, `/robots.txt`, `/feed/google.xml`, and the
+  noindex routes `/search` and `/cart`.
 - The Printify adapter is intentionally not wired to runtime settings yet; do not enable
   provider submission until staging credentials, mapping persistence, and an explicit
   no-live-submit operational guard are in place.
@@ -127,9 +132,8 @@ This document is the starting point for a new session.
 
 ## Next session: resume here
 
-1. Apply and validate additive migrations `0044` through `0046` in a fresh and
-   upgraded supported environment; do not run remote migrations without explicit
-   authorization.
+1. Keep the staging migration ledger aligned with the repository; migrations
+   `0044` through `0046` are already applied to the dedicated staging D1.
 2. Verify the staging admin save/delete flows now return to the products page;
    avoid deleting duplicate rows unless explicitly approved.
 3. Enter or confirm the Stripe test secret key, regular webhook secret,
@@ -150,20 +154,12 @@ This document is the starting point for a new session.
     messaging for buy-now/guest flows plus the combined join-and-save checkout.
 13. Verify Milestone 6 review delivery, moderation, approved rendering, abuse
     reporting, and anonymous/name formatting against a supported local or staging
-    environment once migration `0046` is applied.
+    environment now that migration `0046` is applied.
 14. Do not skip the open Milestone 1–5 staging gates while continuing later
    milestones.
-15. Continue Milestone 7 with normalized-design pagination, canonical/noindex
-   helpers, lastmod-aware sitemap/feed output, and MCP projection alignment.
-16. Run Milestone 7 JSON-LD/schema validation and the full integration/MCP gate
-   in Linux CI or another supported environment before treating the milestone
-   as operationally accepted.
-17. Reauthenticate Wrangler (`wrangler login`) or provide a scoped
-   `CLOUDFLARE_API_TOKEN`, deploy commit `70c9403` to the dedicated staging
-   Worker, then verify `/api/products`, `/llms.txt`, `/sitemap.xml`,
-   `/robots.txt`, `/feed/google.xml`, noindex routes, and normalized-design
-   JSON-LD. Do not run remote migrations unless a schema change requires it.
-
+15. Run Milestone 7 JSON-LD/schema validation and the full integration/MCP gate
+    in Linux CI or another supported environment before treating the milestone
+    as fully operationally accepted.
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
 after meaningful changes, keep migrations additive, keep payment and fulfillment
 provider logic behind ports, and do not deploy or run remote migrations without
