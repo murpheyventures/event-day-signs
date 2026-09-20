@@ -289,7 +289,20 @@ boundary contracts.
 
 ### Owner decisions needed
 
-- Brand direction, typography, color system, photography/assets, and final copy.
+- Resolved for this implementation: warm paper with race-day yellow, signal
+  orange, teal utility color, readable system typography, and a playful but
+  family-friendly voice. Merchant photography/assets remain optional because
+  product imagery is already delivered through the existing StoreImage model.
+
+### Implementation record
+
+Milestone 8 is implemented in `src/themes/event-day-signs/` and selected by
+`theme.config.json`. Discovery remains canonical and server-owned: configured
+categories provide collection links, while the existing search, sort, and
+pagination controls preserve URL, cache, and indexing semantics. Product detail
+uses the normalized purchase control for explicit printed options and presents
+complete digital-bundle/instant-download versus printed/ready-to-ship guidance.
+See `docs/event-day-signs-milestone-8-checklist.md` for the validation record.
 
 ## Milestone 9 — Scale, AI-assisted administration, and optional agentic-commerce spike
 

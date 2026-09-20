@@ -1,0 +1,26 @@
+---
+import type { ProductDetailModel, ProductPurchaseModel } from '../../features/storefront/models';
+import ProductCard from './ProductCard.astro';
+import ProductGallery from '../../features/storefront/controls/ProductGallery.astro';
+import ProductPurchaseForm from '../../features/storefront/controls/ProductPurchaseForm.astro';
+interface Props { model: ProductDetailModel; purchase: ProductPurchaseModel }
+const { model, purchase } = Astro.props;
+const deliveryLabel = model.digitalDelivery ? 'Instant download' : purchase.hasOptions ? 'Choose your printed size' : 'Ready to ship';
+---
+<a href={model.backHref} class="text-xs font-bold uppercase tracking-[0.14em] text-[var(--eds-teal)] hover:text-brand">&larr; Back to signs</a>
+{model.error && <p role="alert" class="mt-4 rounded-lg border-2 border-brand bg-orange-50 px-4 py-3 text-sm text-ink">{model.error}</p>}
+<div class="mt-7 grid items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)] lg:gap-14">
+  <ProductGallery images={model.images} hero={model.heroImage} soldOut={model.soldOut} class="rounded-xl border-2 border-ink bg-surface p-2" />
+  <div class="lg:sticky lg:top-6">
+    {model.categories.length > 0 && <nav aria-label="Categories" class="mb-4 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.12em] text-[var(--eds-teal)]">{model.categories.map((category) => <a href={category.href} class="hover:text-brand">{category.text}</a>)}</nav>}
+    <h1 class="font-serif text-4xl font-bold leading-none tracking-[-0.04em] sm:text-5xl">{model.name}</h1>
+    <p class="mt-4 text-3xl font-bold tabular-nums text-[var(--eds-teal)]" data-price-display data-base={model.priceCents} data-currency={model.currency}>{model.priceVaries && <span class="text-base font-normal text-muted">from </span>}{model.formattedPrice}</p>
+    <div class="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--eds-yellow)] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.1em] text-ink"><span aria-hidden="true">✓</span>{deliveryLabel}</div>
+    {model.lowStock && <p data-low-stock class="mt-3 text-sm font-bold text-brand">Low stock — grab it before race day.</p>}
+    {model.descriptionHtml && <div class="markdown-content mt-6 text-muted" set:html={model.descriptionHtml} />}
+    {model.digitalDelivery ? <p class="mt-5 rounded-lg border-2 border-line bg-surface px-4 py-3 text-sm font-semibold">Your purchase includes the complete digital bundle, so every approved size and variation is ready when you are.</p> : <p class="mt-5 rounded-lg border-2 border-line bg-surface px-4 py-3 text-sm font-semibold">Printed signs are made for the moment: choose the exact size above, then we’ll show the available ready-by path at checkout.</p>}
+    <ProductPurchaseForm model={purchase} />
+    <button type="button" data-share data-share-title={model.name} class="mt-5 hidden text-xs font-bold uppercase tracking-[0.12em] text-muted hover:text-brand"><span data-share-label>Share this sign</span></button>
+  </div>
+</div>
+{model.related.length > 0 && <section class="mt-16 border-t-2 border-ink pt-8"><h2 class="mb-5 font-serif text-2xl font-bold">More signs for this moment</h2><ul class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">{model.related.map((card, i) => <ProductCard card={card} index={i} headingLevel="h3" />)}</ul></section>}

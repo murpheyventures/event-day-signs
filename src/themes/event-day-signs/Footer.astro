@@ -1,0 +1,11 @@
+---
+import type { StorefrontShellModel } from '../../features/storefront/models';
+interface Props { model: StorefrontShellModel }
+const { model } = Astro.props;
+---
+<footer class="mt-16 border-t-2 border-ink bg-[var(--eds-teal)] text-white">
+  <div class="mx-auto flex max-w-[78rem] flex-wrap items-start justify-between gap-8 px-5 py-12">
+    <div><p class="font-serif text-2xl font-bold">{model.storeName}</p><p class="mt-2 max-w-xs text-sm text-white/80">Signs for the sideline, finish line, and every big moment in between.</p></div>
+    {model.footerLinks.length > 0 && <nav aria-label="Footer" class="flex flex-wrap gap-x-7 gap-y-3 text-xs font-bold uppercase tracking-[0.12em]">{model.footerLinks.map((link) => <a href={link.href} class="hover:text-[var(--eds-yellow)]">{link.text}</a>)}</nav>}
+  </div>
+</footer>

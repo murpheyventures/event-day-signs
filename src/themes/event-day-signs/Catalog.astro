@@ -1,0 +1,25 @@
+---
+import type { CatalogPageModel } from '../../features/storefront/models';
+import ProductCard from './ProductCard.astro';
+import CatalogSort from '../../features/storefront/controls/CatalogSort.astro';
+import CatalogPagination from '../../features/storefront/controls/CatalogPagination.astro';
+interface Props { model: CatalogPageModel }
+const { model } = Astro.props;
+---
+<section class="mb-10 rounded-xl border-2 border-ink bg-[var(--eds-yellow)] px-6 py-7 sm:px-10">
+  <p class="text-xs font-bold uppercase tracking-[0.2em] text-[var(--eds-teal)]">{model.eyebrow}</p>
+  <h1 class="mt-2 max-w-3xl font-serif text-4xl font-bold leading-[0.95] tracking-[-0.045em] sm:text-6xl">{model.heading}</h1>
+  <p class="mt-4 max-w-xl text-sm font-semibold leading-relaxed text-ink/80">Find the right sign by event, recipient, mood, and format. Start with a collection below or search for a phrase.</p>
+</section>
+
+<section aria-labelledby="discover-heading" class="mb-8 border-y-2 border-ink py-4">
+  <div class="flex flex-wrap items-center gap-3">
+    <h2 id="discover-heading" class="mr-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--eds-teal)]">Shop by moment</h2>
+    {model.categories.map((category) => <a href={category.href} class="rounded-full border-2 border-line bg-surface px-3 py-1.5 text-xs font-bold text-ink hover:border-brand hover:text-brand">{category.text}</a>)}
+    <CatalogSort model={model.sort} class="ml-auto flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-[0.1em] text-muted" />
+  </div>
+</section>
+
+{model.products.length === 0 && <p role="status" class="rounded-lg border-2 border-line bg-surface p-8 text-center text-muted">No signs match that search yet. Try another event or phrase.</p>}
+{model.products.length > 0 && <ul class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{model.products.map((card, i) => <ProductCard card={card} index={i} />)}</ul>}
+<CatalogPagination model={model.pagination} class="mt-10 flex items-center justify-center gap-1" />

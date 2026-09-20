@@ -1,0 +1,19 @@
+---
+import type { ProductCardModel } from '../../features/storefront/models';
+import StoreImage from '../../features/storefront/controls/StoreImage.astro';
+interface Props { card: ProductCardModel; index?: number; headingLevel?: 'h2' | 'h3' }
+const { card, index = 0, headingLevel = 'h2' } = Astro.props;
+const Heading = headingLevel;
+---
+<li class="reveal group" style={`animation-delay:${Math.min(index, 8) * 55}ms`}>
+  <a href={card.href} class="block rounded-lg border-2 border-line bg-surface p-2 transition hover:-translate-y-1 hover:border-brand hover:shadow-[4px_4px_0_var(--eds-yellow)]">
+    <div class="relative overflow-hidden rounded-md bg-paper">
+      <StoreImage image={card.image} fade class={`aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-[1.035]${card.inStock ? '' : ' opacity-55'}`} />
+      {!card.inStock && <span class="absolute left-3 top-3 rounded-full bg-ink px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">Sold out</span>}
+    </div>
+    <div class="flex items-start justify-between gap-3 px-2 pb-2 pt-4">
+      <Heading class="font-serif text-lg font-bold leading-tight tracking-tight group-hover:text-brand">{card.name}</Heading>
+      <span class="shrink-0 text-sm font-bold tabular-nums text-[var(--eds-teal)]">{card.formattedPrice}</span>
+    </div>
+  </a>
+</li>

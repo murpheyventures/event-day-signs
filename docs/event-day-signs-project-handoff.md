@@ -74,6 +74,12 @@ This document is the starting point for a new session.
   Test confirms Product snippets are valid, but five Merchant listing items are
   invalid because the normalized ProductGroup and variants do not emit images;
   the supported Linux integration gate also remains open.
+- **Milestone 8:** the store-owned `event-day-signs` theme is implemented and
+  active. It provides the event-oriented shell, discovery rail, editorial
+  internal links, responsive product cards, digital-bundle/instant-download
+  messaging, printed-option/ready-to-ship messaging, and reduced-motion/focus
+  treatment without adding a second commerce or filtering authority. See
+  `docs/event-day-signs-milestone-8-checklist.md`.
 
 ## Validation record
 
@@ -154,23 +160,26 @@ This document is the starting point for a new session.
    available; keep the explicit no-live-submit guard disabled by default.
 9. Run one explicitly authorized provider test order, then reconcile its status.
 10. Run the complete verification suite in Linux CI or another supported environment.
-11. Verify Milestone 4's bounded output against a staging catalog larger than 50
+11. Run the Milestone 8 browser visual smoke and critical checkout matrix in a
+    supported browser environment; the local storefront contract/build checks
+    are complete, but browser automation is not available in this handoff.
+12. Verify Milestone 4's bounded output against a staging catalog larger than 50
    products and confirm that the complete paginated JSON feed maps to canonical
    sitemap URLs.
-12. Resolve the remaining Milestone 5 owner decisions and finish member-price
+13. Resolve the remaining Milestone 5 owner decisions and finish member-price
     messaging for buy-now/guest flows plus the combined join-and-save checkout.
-13. Verify Milestone 6 review delivery, moderation, approved rendering, abuse
+14. Verify Milestone 6 review delivery, moderation, approved rendering, abuse
     reporting, and anonymous/name formatting against a supported local or staging
     environment now that migration `0046` is applied.
-14. Do not skip the open Milestone 1–5 staging gates while continuing later
+15. Do not skip the open Milestone 1–5 staging gates while continuing later
    milestones.
-15. Run Milestone 7 JSON-LD/schema validation and the full integration/MCP gate
+16. Run Milestone 7 JSON-LD/schema validation and the full integration/MCP gate
     in Linux CI or another supported environment before treating the milestone
     as fully operationally accepted.
-16. Fix normalized structured data so the ProductGroup and every variant Product
+17. Fix normalized structured data so the ProductGroup and every variant Product
     emit a real product image, then rerun the Google Rich Results Test and the
     Schema.org Markup Validator.
-17. Triage the remaining Merchant listing warnings after the image fix:
+18. Triage the remaining Merchant listing warnings after the image fix:
     variant descriptions, global identifiers/brand, return policy, and shipping
     details.
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`

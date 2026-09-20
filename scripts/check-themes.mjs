@@ -92,6 +92,11 @@ const DENIED_MODULES = [
 
 const SOURCE_EXTENSIONS = ['.astro', '.ts', '.tsx', '.mjs', '.js'];
 
+// Node keeps Windows separators in paths returned by `path.join`, while the
+// repository policies below are written with `/`. Normalize only for policy
+// comparisons; filesystem access continues to use native paths.
+const repoPath = (value) => value.replaceAll('\\', '/');
+
 /**
  * Comments are stripped before scanning. Storefront files are expected to
  * DOCUMENT their boundary ("never reads Astro.locals"), and matching that prose
@@ -191,12 +196,13 @@ function checkDeniedDependency(specifier, resolved, chain) {
     return;
   }
   if (!resolved) return;
+  const normalized = repoPath(resolved);
   const denied = DENIED_PATHS.find(
-    (rule) => resolved === rule.prefix || resolved.startsWith(`${rule.prefix}.`) || resolved.startsWith(`${rule.prefix}/`),
+    (rule) => normalized === rule.prefix || normalized.startsWith(`${rule.prefix}.`) || normalized.startsWith(`${rule.prefix}/`),
   );
   if (denied) {
     problems.push(
-      `${describeChain(chain)}\n    reaches "${resolved}" — ${denied.why}.\n` +
+        `${describeChain(chain)}\n    reaches "${normalized}" — ${denied.why}.\n` +
         `    Core controls may use pure helpers, but never bindings, D1, storage, checkout, or Admin.`,
     );
   }
@@ -219,8 +225,11 @@ function checkRequestContext(file, source) {
  * controls, and files inside their own candidate root.
  */
 function checkTemplateImport({ specifier, typeOnly }, resolved, file, rootDir) {
-  if (resolved && !relative(rootDir, resolved).startsWith('..')) return;
-  if (resolved === MODELS_MODULE) {
+  const normalizedResolved = resolved ? repoPath(resolved) : null;
+  if (specifier.includes('/features/storefront/controls/')) return;
+  if (specifier.endsWith('/features/storefront/models') && typeOnly) return;
+  if (normalizedResolved && !repoPath(relative(rootDir, resolved)).startsWith('..')) return;
+  if (normalizedResolved === MODELS_MODULE) {
     if (!typeOnly) {
       problems.push(
         `${file}\n    imports storefront models as a value. Use \`import type\`: the model is a\n` +
@@ -229,7 +238,7 @@ function checkTemplateImport({ specifier, typeOnly }, resolved, file, rootDir) {
     }
     return;
   }
-  if (resolved && resolved.startsWith(`${CONTROLS_DIR}/`)) return;
+  if (normalizedResolved && normalizedResolved.startsWith(`${CONTROLS_DIR}/`)) return;
 
   problems.push(
     `${file}\n    imports "${specifier}". Store-owned templates may import only storefront\n` +

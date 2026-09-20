@@ -1,0 +1,10 @@
+---
+import type { ContentPageModel } from '../../features/storefront/models';
+interface Props { model: ContentPageModel }
+const { model } = Astro.props;
+---
+<article data-page-layout={model.layout} style={model.layoutStyle} class="mx-auto max-w-[var(--prose-measure)]">
+  <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--eds-teal)]">Event Day Signs</p>
+  <h1>{model.title}</h1>
+  <div class="markdown-content mt-8" set:html={model.html} />
+</article>

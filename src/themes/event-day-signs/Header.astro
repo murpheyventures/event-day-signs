@@ -1,0 +1,27 @@
+---
+import type { StorefrontShellModel } from '../../features/storefront/models';
+import StoreNav from '../../features/storefront/controls/StoreNav.astro';
+import StoreSearch from '../../features/storefront/controls/StoreSearch.astro';
+import StoreCartControl from '../../features/storefront/controls/StoreCartControl.astro';
+import StoreAccountControl from '../../features/storefront/controls/StoreAccountControl.astro';
+
+interface Props { model: StorefrontShellModel }
+const { model } = Astro.props;
+const utility = 'text-xs font-bold uppercase tracking-[0.12em] text-muted hover:text-brand';
+---
+
+{model.announcement && <div class="bg-[var(--eds-teal)] px-4 py-2 text-center text-xs font-bold text-white"><a href={model.announcement.href || undefined} class="underline-offset-4 hover:underline">{model.announcement.text}</a></div>}
+<header class="border-b-2 border-ink bg-paper">
+  <div class="mx-auto flex max-w-[78rem] flex-wrap items-center gap-x-6 gap-y-4 px-5 py-5">
+    <a href="/" aria-label={model.storeName} class="shrink-0">
+      {model.logo ? <img src={model.logo.src} alt={model.logo.alt} class="h-10 max-w-56 object-contain" /> : <span class="font-serif text-2xl font-bold tracking-tight text-ink sm:text-3xl">{model.storeName}</span>}
+    </a>
+    <nav aria-label="Store" class="ml-auto flex items-center gap-4 sm:gap-6">
+      <StoreNav links={model.headerLinks} class={`hidden items-center gap-5 lg:flex ${utility}`} disclosureClass={`relative lg:hidden ${utility}`} />
+      <a href={model.search.action} class={`${utility} sm:hidden`}>Search</a>
+      {model.account.enabled && <StoreAccountControl href={model.account.href} class={utility} />}
+      {model.cart.enabled && <StoreCartControl href={model.cart.href} class={utility} />}
+    </nav>
+    <StoreSearch action={model.search.action} query={model.search.query} class="order-last w-full border-b-2 border-line focus-within:border-brand sm:order-none sm:ml-auto sm:w-52" inputClass="w-full bg-transparent px-0 py-1 text-sm focus:outline-none" />
+  </div>
+</header>
