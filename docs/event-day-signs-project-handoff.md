@@ -6,8 +6,8 @@ This document is the starting point for a new session.
 
 - Repository: `C:\Users\steph\Documents\Event Day Signs`
 - Branch: `main`
-- Last implementation commit: `3b36588` (`fix: redirect after cache-disabled product mutations`).
-- `origin/main` is synchronized with local `main` at `3b36588`.
+- Last implementation commit: `7a5c9d2` (`feat: finalize review display policies`).
+- `origin/main` is synchronized with local `main` at `7a5c9d2`.
 - Staging Worker is deployed at
   `https://event-day-signs-staging.stephen-8cc.workers.dev` with dedicated D1,
   public-image R2, private-files R2, SESSION KV, `AUTH_SECRET`, and `SECRETS_KEK`.
@@ -55,6 +55,14 @@ This document is the starting point for a new session.
   migration 0043 and separate staging webhook destinations are in place.
   Stripe test credentials, a test Price ID, and end-to-end membership checkout
   verification remain.
+- **Milestone 6:** verified-purchase reviews are implemented end to end: additive
+  review/token/audit/report schema, paid-order-item credentials, one-review
+  enforcement, scheduled email requests, protected moderation, approved-only
+  public summaries and rendering, abuse reports, and the customer-photo slot.
+  Review policy is finalized: pending reviews are hidden until approved, digital
+  requests wait 7 days, printed requests wait 3 days after fulfillment, display
+  names use first name plus last initial with anonymous allowed, and reviews are
+  not incentivized. See `docs/event-day-signs-milestone-6-checklist.md`.
 
 ## Validation record
 
@@ -76,12 +84,13 @@ This document is the starting point for a new session.
   rules on the server, stores the member-price decision in the reservation, and
   snapshots it onto the settled order. Guest and buy-now flows remain at base
   price until identity is available.
-- **Milestone 6 foundation:** additive verified-review schema, expiring paid-order
-  item credentials, one-review enforcement, moderation state, and approved-review
-  repository. See `docs/event-day-signs-milestone-6-checklist.md`.
-- Full `npm run verify`: currently blocked by known baseline issues on this Windows
-  environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
-  boundary test has Windows path handling failures. These failures predate Milestone 2.
+- `npm run check`: passed after Milestone 6 policy work with 0 errors, 0 warnings,
+  and 2 pre-existing hints.
+- `git diff --check`: passed after Milestone 6 policy work.
+- Full `npm run verify`: still blocked by the known Windows baseline issues:
+  Vitest cannot resolve `cloudflare:workers`, storefront boundary tests have
+  Windows path handling failures, and the existing rollout-gate expectation for
+  trimmed `MCP_URL` remains. No new Milestone 6 type-check failures were found.
 - Staging D1 has migrations `0001` through `0043` applied. The FTS5 migrations
   `0003` and `0039` were applied through Wrangler's direct file-execution
   workaround, then recorded in the migration ledger because the remote
@@ -105,13 +114,15 @@ This document is the starting point for a new session.
 
 ## Next session: resume here
 
-1. Verify the staging admin save/delete flows now return to the products page;
+1. Apply and validate additive migrations `0044` through `0046` in a fresh and
+   upgraded supported environment; do not run remote migrations without explicit
+   authorization.
+2. Verify the staging admin save/delete flows now return to the products page;
    avoid deleting duplicate rows unless explicitly approved.
-2. Enter or confirm the Stripe test secret key, regular webhook secret,
+3. Enter or confirm the Stripe test secret key, regular webhook secret,
    membership webhook secret, and annual recurring test Price ID in the admin.
-3. Verify one normal Stripe test checkout and one membership checkout, then
+4. Verify one normal Stripe test checkout and one membership checkout, then
    confirm the corresponding webhook deliveries and admin state.
-4. Verify fresh-database and upgrade-database migration paths.
 5. Create a published digital bundle and verify that only approved assets resolve.
 6. Create a printed offer mapping and verify that no provider submission occurs.
 7. Verify duplicate fulfillment attempts reuse the same idempotency key/job.
@@ -124,9 +135,10 @@ This document is the starting point for a new session.
    sitemap URLs.
 12. Resolve the remaining Milestone 5 owner decisions and finish member-price
     messaging for buy-now/guest flows plus the combined join-and-save checkout.
-13. Begin Milestone 6 with verified-purchase reviews, while retaining the open
-    Milestone 5 staging and policy gates.
-14. Do not skip the open Milestone 1–4 staging gates while continuing later
+13. Verify Milestone 6 review delivery, moderation, approved rendering, abuse
+    reporting, and anonymous/name formatting against a supported local or staging
+    environment once migration `0046` is applied.
+14. Do not skip the open Milestone 1–5 staging gates while continuing later
    milestones.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
