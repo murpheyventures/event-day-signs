@@ -63,6 +63,7 @@ let validationError = '';
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const action = form.get('_action');
+  const actionName = typeof action === 'string' ? action : '';
   // Each section submits its keys as `secret:<name>` inputs (blank = keep) plus an
   // optional `clear:<name>` checkbox (remove). Process them with the section's save.
   const applySecrets = async (names: SecretName[]) => {
@@ -304,7 +305,26 @@ if (Astro.request.method === 'POST') {
   // Admin saves are deliberately coarse and infrequent. Purge both public
   // dependency roots after the write rather than risk a newly added setting
   // silently missing its invalidation edge.
-  await purgeCacheTags([CACHE_TAG.shell, CACHE_TAG.catalog]);
+  // Provider credentials and other operational settings are not represented in
+  // cached storefront HTML. Purging those saves makes staging fail when cache
+  // purge is unavailable/disabled, even though the encrypted vault write has
+  // already succeeded. Only invalidate for settings that can change public
+  // shell/catalog output.
+  const publicCacheActions = new Set([
+    'toggle_feature',
+    'toggle_payment',
+    'save_store',
+    'save_logo',
+    'save_home',
+    'save_announcement',
+    'set_image_delivery',
+    'set_search',
+    'save_default',
+    'save_weight_unit',
+  ]);
+  if (publicCacheActions.has(actionName)) {
+    await purgeCacheTags([CACHE_TAG.shell, CACHE_TAG.catalog]);
+  }
   // Background (JS) submit → no redirect; the client re-fetches + swaps the section.
   if (Astro.request.headers.get('x-requested-with') === 'fetch') {
     return validationError
