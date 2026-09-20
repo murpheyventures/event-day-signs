@@ -1,8 +1,9 @@
 # Event Day Signs — Milestone 7 Checklist
 
 Status: implementation complete; Cloudflare staging verification completed on
-2026-09-20. External Schema/Rich Results validation and the supported Linux
-integration gate remain open.
+2026-09-20. Product snippets are valid in Google's Rich Results Test. Merchant
+listings still require an image follow-up, and the supported Linux integration
+gate remains open.
 
 ## Completed in this slice
 
@@ -24,7 +25,14 @@ integration gate remain open.
 - [x] Add shared canonical/robots/noindex helpers and accurate sitemap lastmod.
 - [x] Add Merchant Center and complete catalog feed projections.
 - [x] Align MCP buyer projections with the public normalized catalog contract.
-- [ ] Validate representative JSON-LD with Schema.org and Rich Results tooling.
+- [x] Validate the representative normalized product with Google's Rich Results
+  Test: Product snippets are valid and eligible.
+- [ ] Resolve Merchant listings' critical missing `image` field on the
+  `ProductGroup` and each variant `Product`.
+- [ ] Re-run Google's Rich Results Test after images are emitted and confirm all
+  five Merchant listing items are valid.
+- [ ] Run the Schema.org Markup Validator against the same representative page.
+- [ ] Run the complete Linux-supported integration/MCP verification gate.
 - [x] Complete Cloudflare staging verification; supported-environment integration
   remains open.
 
@@ -45,7 +53,18 @@ integration gate remain open.
   `/feed/google.xml`; the feed includes Google product namespace, price, and
   availability, while the sitemap includes normalized URLs and `lastmod`.
 - [x] Verify `/search` and `/cart` return `noindex, nofollow` metadata.
-- [ ] Validate representative JSON-LD with Schema.org and Rich Results tooling.
+- [x] Validate representative JSON-LD with Google's Rich Results Test. The
+  report at
+  `https://search.google.com/test/rich-results/result?id=KcjqvblPx-MxbsnEsMwhxw`
+  found one valid Product snippet item and five invalid Merchant listing items.
+- [ ] Fix the Merchant listing critical issue: `image` is missing from the
+  normalized `ProductGroup` and each variant `Product`. Google also reports
+  optional warnings for variant descriptions, global identifiers, return
+  policy, and shipping details; triage those after the critical image fix.
+- [ ] Re-run the Rich Results Test and validate the final JSON-LD with the
+  Schema.org Markup Validator.
+- [ ] Run the complete verification suite on Linux CI or another supported
+  environment.
 
 The Cloudflare staging endpoint matrix passed after the migrations were
 applied. The remaining validation requires a supported external/schema tool or

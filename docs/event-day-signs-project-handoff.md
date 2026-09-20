@@ -70,9 +70,10 @@ This document is the starting point for a new session.
 - **Milestone 7 implementation:** the public catalog now unions legacy products
   and published normalized designs for pagination, llms.txt, and the Merchant
   Center feed; shared indexing/canonical helpers and sitemap lastmod output are
-  in place. Cloudflare staging verification is complete; external
-  Schema/Rich Results validation and the supported Linux integration gate remain
-  open.
+  in place. Cloudflare staging verification is complete. Google's Rich Results
+  Test confirms Product snippets are valid, but five Merchant listing items are
+  invalid because the normalized ProductGroup and variants do not emit images;
+  the supported Linux integration gate also remains open.
 
 ## Validation record
 
@@ -101,7 +102,7 @@ This document is the starting point for a new session.
   Vitest cannot resolve `cloudflare:workers`, storefront boundary tests have
   Windows path handling failures, and the existing rollout-gate expectation for
   trimmed `MCP_URL` remains. No new Milestone 6 type-check failures were found.
-- Staging D1 has migrations `0001` through `0043` applied. The FTS5 migrations
+- Staging D1 has migrations `0001` through `0046` applied. The FTS5 migrations
   `0003` and `0039` were applied through Wrangler's direct file-execution
   workaround, then recorded in the migration ledger because the remote
   migration runner has a known trigger-splitting parser bug.
@@ -113,6 +114,12 @@ This document is the starting point for a new session.
   matrix passed for `/api/products`, normalized product detail JSON-LD,
   `/llms.txt`, `/sitemap.xml`, `/robots.txt`, `/feed/google.xml`, and the
   noindex routes `/search` and `/cart`.
+- Google Rich Results Test report:
+  `https://search.google.com/test/rich-results/result?id=KcjqvblPx-MxbsnEsMwhxw`.
+  Product snippets passed with one valid item. Merchant listings detected five
+  invalid variant items; the critical issue is missing `image`. Optional
+  warnings cover variant descriptions, global identifiers, return policy, and
+  shipping details.
 - The Printify adapter is intentionally not wired to runtime settings yet; do not enable
   provider submission until staging credentials, mapping persistence, and an explicit
   no-live-submit operational guard are in place.
@@ -160,6 +167,12 @@ This document is the starting point for a new session.
 15. Run Milestone 7 JSON-LD/schema validation and the full integration/MCP gate
     in Linux CI or another supported environment before treating the milestone
     as fully operationally accepted.
+16. Fix normalized structured data so the ProductGroup and every variant Product
+    emit a real product image, then rerun the Google Rich Results Test and the
+    Schema.org Markup Validator.
+17. Triage the remaining Merchant listing warnings after the image fix:
+    variant descriptions, global identifiers/brand, return policy, and shipping
+    details.
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
 after meaningful changes, keep migrations additive, keep payment and fulfillment
 provider logic behind ports, and do not deploy or run remote migrations without
