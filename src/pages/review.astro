@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const token = Astro.url.searchParams.get('token')?.trim() ?? '';
+---
+
+<Layout title="Share your experience" description="Leave a verified-purchase review.">
+  <main class="mx-auto max-w-lg">
+    <h1 class="mb-2 font-serif text-3xl tracking-tight">Share your experience</h1>
+    <p class="mb-6 text-sm text-muted">Reviews are checked before they appear publicly.</p>
+    {!token ? (
+      <p class="rounded-md border border-line bg-surface p-4 text-sm">This review link is missing its verification token.</p>
+    ) : (
+      <form id="review-form" class="space-y-4">
+        <input type="hidden" name="token" value={token} />
+        <label class="block text-sm"><span class="mb-1 block font-medium">Rating</span><select name="rating" class="w-full rounded-md border border-line px-3 py-2"><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Poor</option><option value="1">1 — Very poor</option></select></label>
+        <label class="block text-sm"><span class="mb-1 block font-medium">Display name</span><input name="display_name" required maxlength="120" class="w-full rounded-md border border-line px-3 py-2" placeholder="Alex" /></label>
+        <label class="block text-sm"><span class="mb-1 block font-medium">Format</span><select name="format" class="w-full rounded-md border border-line px-3 py-2"><option value="digital">Digital</option><option value="printed">Printed</option></select></label>
+        <label class="block text-sm"><span class="mb-1 block font-medium">Review</span><textarea name="body" required maxlength="4000" rows="6" class="w-full rounded-md border border-line px-3 py-2"></textarea></label>
+        <button class="w-full rounded-md bg-brand px-4 py-2.5 font-medium text-on-brand" type="submit">Submit review</button>
+        <p id="review-status" class="text-sm" role="status"></p>
+      </form>
+    )}
+  </main>
+</Layout>
+
+{token && <script>
+  const form = document.querySelector('#review-form');
+  const status = document.querySelector('#review-status');
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget as HTMLFormElement);
+    const response = await fetch('/api/reviews', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(Object.fromEntries(data)) });
+    const result = await response.json() as { error?: string };
+    if (status) status.textContent = response.ok ? 'Thanks — your review is awaiting moderation.' : (result.error ?? 'Review submission failed.');
+    if (response.ok) form.querySelector('button')?.setAttribute('disabled', 'true');
+  });
+</script>}

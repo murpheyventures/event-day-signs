@@ -32,6 +32,7 @@ export const PUBLIC_ID_PREFIXES = {
   printMapping: 'pmap',
   fulfillmentJob: 'fjob',
   membership: 'mem',
+  review: 'rev',
 } as const;
 
 export type PublicIdKind = keyof typeof PUBLIC_ID_PREFIXES;

@@ -76,6 +76,9 @@ This document is the starting point for a new session.
   rules on the server, stores the member-price decision in the reservation, and
   snapshots it onto the settled order. Guest and buy-now flows remain at base
   price until identity is available.
+- **Milestone 6 foundation:** additive verified-review schema, expiring paid-order
+  item credentials, one-review enforcement, moderation state, and approved-review
+  repository. See `docs/event-day-signs-milestone-6-checklist.md`.
 - Full `npm run verify`: currently blocked by known baseline issues on this Windows
   environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
   boundary test has Windows path handling failures. These failures predate Milestone 2.
