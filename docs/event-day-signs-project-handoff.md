@@ -6,10 +6,8 @@ This document is the starting point for a new session.
 
 - Repository: `C:\Users\steph\Documents\Event Day Signs`
 - Branch: `main`
-- Last implementation commit: Milestone 5 pricing foundation (to be created by
-  the commit that accompanies this handoff).
-- `origin/main` is synchronized before this handoff commit; push this commit to
-  keep the remote continuation point current.
+- Last implementation commit: `7cb19a0` (`fix: make staging build path portable`).
+- `origin/main` is synchronized with local `main` at `7cb19a0`.
 - Staging Worker is deployed at
   `https://event-day-signs-staging.stephen-8cc.workers.dev` with dedicated D1,
   public-image R2, private-files R2, SESSION KV, `AUTH_SECRET`, and `SECRETS_KEK`.
@@ -54,7 +52,10 @@ This document is the starting point for a new session.
 - Full `npm run verify`: currently blocked by known baseline issues on this Windows
   environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
   boundary test has Windows path handling failures. These failures predate Milestone 2.
-- The Milestone 2 migration has not yet been applied to staging D1.
+- Staging D1 has migrations `0001` through `0042` applied. The FTS5 migrations
+  `0003` and `0039` were applied through Wrangler's direct file-execution
+  workaround, then recorded in the migration ledger because the remote
+  migration runner has a known trigger-splitting parser bug.
 - The Printify adapter is intentionally not wired to runtime settings yet; do not enable
   provider submission until staging credentials, mapping persistence, and an explicit
   no-live-submit operational guard are in place.
@@ -65,27 +66,33 @@ This document is the starting point for a new session.
   `docs/event-day-signs-milestones-4-10-architecture.md` remains open; the
   current Milestone 4 checklist records the separate SEO/discovery slice that
   was implemented.
+- Claude test-product intake requirements are documented in
+  `docs/event-day-signs-test-product-package.md`. The next product request is
+  “Suck it up princess,” with two designs, two verified Printify sizes, and one
+  digital bundle containing all four design-size combinations.
 
 ## Next session: resume here
 
-1. Finish staging onboarding at the deployed Worker URL and optionally load the
+1. Review Claude's generated test-product package against
+   `docs/event-day-signs-test-product-package.md`.
+2. Finish staging onboarding at the deployed Worker URL and optionally load the
    demo catalog.
-2. Enter Stripe test credentials in Admin → Settings → Payments and configure
+3. Enter Stripe test credentials in Admin → Settings → Payments and configure
    the Stripe webhook endpoint/signing secret.
-3. Verify fresh-database and upgrade-database migration paths.
-4. Create a published digital bundle and verify that only approved assets resolve.
-5. Create a printed offer mapping and verify that no provider submission occurs.
-6. Verify duplicate fulfillment attempts reuse the same idempotency key/job.
-7. Wire Printify settings and persistence only after staging-only credentials are
+4. Verify fresh-database and upgrade-database migration paths.
+5. Create a published digital bundle and verify that only approved assets resolve.
+6. Create a printed offer mapping and verify that no provider submission occurs.
+7. Verify duplicate fulfillment attempts reuse the same idempotency key/job.
+8. Wire Printify settings and persistence only after staging-only credentials are
    available; keep the explicit no-live-submit guard disabled by default.
-8. Run one explicitly authorized provider test order, then reconcile its status.
-9. Run the complete verification suite in Linux CI or another supported environment.
-10. Verify Milestone 4's bounded output against a staging catalog larger than 50
+9. Run one explicitly authorized provider test order, then reconcile its status.
+10. Run the complete verification suite in Linux CI or another supported environment.
+11. Verify Milestone 4's bounded output against a staging catalog larger than 50
    products and confirm that the complete paginated JSON feed maps to canonical
    sitemap URLs.
-11. Resolve Milestone 5 owner decisions, then add Stripe membership state,
+12. Resolve Milestone 5 owner decisions, then add Stripe membership state,
     event handling, admin configuration, and checkout integration.
-12. Do not skip the open Milestone 1–4 staging gates while continuing later
+13. Do not skip the open Milestone 1–4 staging gates while continuing later
     milestones.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
