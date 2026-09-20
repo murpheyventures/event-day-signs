@@ -38,6 +38,8 @@ export interface NormalizedDesign {
   categories: string[];
   variants: NormalizedDesignVariant[];
   offers: NormalizedOffer[];
+  seo_title?: string | null;
+  seo_description?: string | null;
   source: { kind: 'legacy_product' } | { kind: 'design' };
 }
 

@@ -63,6 +63,10 @@ This document is the starting point for a new session.
   requests wait 7 days, printed requests wait 3 days after fulfillment, display
   names use first name plus last initial with anonymous allowed, and reviews are
   not incentivized. See `docs/event-day-signs-milestone-6-checklist.md`.
+- **Milestone 7 foundation:** normalized design detail responses now expose
+  offer formats and delivery metadata, and normalized design pages emit shared
+  `ProductGroup` structured data with approved review aggregates. See
+  `docs/event-day-signs-milestone-7-checklist.md`.
 
 ## Validation record
 
@@ -140,6 +144,8 @@ This document is the starting point for a new session.
     environment once migration `0046` is applied.
 14. Do not skip the open Milestone 1–5 staging gates while continuing later
    milestones.
+15. Continue Milestone 7 with normalized-design pagination, canonical/noindex
+   helpers, lastmod-aware sitemap/feed output, and MCP projection alignment.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
 after meaningful changes, keep migrations additive, keep payment and fulfillment

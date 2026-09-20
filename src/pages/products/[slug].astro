@@ -9,6 +9,7 @@ import { addCacheTags, productCacheTags } from '../../features/cache/tags';
 import { getDesignBySlug, getNormalizedDesign } from '../../features/catalog/db';
 import NormalizedDesignDetail from '../../features/catalog/NormalizedDesignDetail.astro';
 import { listApprovedReviews, reviewSummary } from '../../features/reviews/db';
+import { normalizedDesignStructuredData, stringifyStructuredData } from '../../features/seo/structuredData';
 
 const loaded = await loadProductDetail(env.DB, {
   slug: Astro.params.slug,
@@ -31,6 +32,15 @@ if (loaded.status === 'not_found' && !normalized) return new Response('Not found
 const normalizedRow = normalized && Astro.params.slug ? await getDesignBySlug(env.DB, Astro.params.slug) : null;
 const normalizedReviews = normalizedRow ? await listApprovedReviews(env.DB, normalizedRow.id) : [];
 const normalizedSummary = normalizedRow ? await reviewSummary(env.DB, normalizedRow.id) : null;
+const normalizedJsonLd = normalized
+  ? stringifyStructuredData(normalizedDesignStructuredData(
+      normalized,
+      publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN),
+      normalizedSummary
+        ? { value: normalizedSummary.average ?? 0, count: normalizedSummary.count }
+        : null,
+    ))
+  : null;
 
 const { model, purchase, seo } = loaded.status === 'ok' ? loaded : { model: null, purchase: null, seo: null };
 if (loaded.status === 'ok') addCacheTags(Astro.response.headers, productCacheTags(loaded.cacheTagIds));
@@ -40,10 +50,11 @@ if (loaded.status === 'ok' && loaded.backfillRelated) {
 }
 ---
 
-<Layout title={seo?.title ?? normalized?.title ?? ''} description={seo?.description ?? normalized?.description ?? undefined} image={seo?.imagePath}>
+<Layout title={seo?.title ?? normalized?.seo_title ?? normalized?.title ?? ''} description={seo?.description ?? normalized?.seo_description ?? normalized?.description ?? undefined} image={seo?.imagePath}>
   {normalized && normalizedSummary ? <NormalizedDesignDetail design={normalized} reviews={normalizedReviews} average={normalizedSummary.average} count={normalizedSummary.count} /> : model && purchase ? <ProductDetail model={model} purchase={purchase} /> : null}
 
   {seo && <script is:inline type="application/ld+json" set:html={seo.jsonLd} />}
+  {normalizedJsonLd && <script is:inline type="application/ld+json" set:html={normalizedJsonLd} />}
 
   {/* Live price + hero image: reflect the chosen variant + checked add-ons. No-JS
       still works — the server computes the real price in cart/checkout, and the

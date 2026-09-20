@@ -149,6 +149,8 @@ export async function getNormalizedDesign(
       slug: design.slug,
       title: design.title,
       description: design.description,
+      seo_title: design.seo_title,
+      seo_description: design.seo_description,
       categories: [],
       variants: variants.map<NormalizedDesignVariant>((variant) => ({
         id: variant.public_id,

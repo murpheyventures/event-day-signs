@@ -22,6 +22,16 @@ export interface CatalogExtra {
   price_delta: { amount: number; cents: number; currency: string };
 }
 
+export interface CatalogOffer {
+  id: string;
+  format: 'printed' | 'digital';
+  label: string | null;
+  price: { amount: number; cents: number; currency: string };
+  in_stock: boolean;
+  requires_shipping: boolean;
+  sku: string | null;
+}
+
 /**
  * The public, machine-readable shape of a product — what the `/api/products`
  * catalog endpoints return for agents/tools. Stable, self-describing, with
@@ -51,6 +61,8 @@ export interface CatalogProduct {
   url: string;
   variants?: CatalogVariant[];
   extras?: CatalogExtra[];
+  offers?: CatalogOffer[];
+  source?: 'legacy_product' | 'design';
 }
 
 const money = (cents: number, currency: string) => ({
@@ -129,6 +141,16 @@ export function toCatalogDesign(
     categories: design.categories,
     image: new URL('/placeholder.png', origin).href,
     url: new URL(`/products/${design.slug}`, origin).href,
+    source: design.source.kind,
+    offers: offers.map((offer) => ({
+      id: offer.id,
+      format: offer.format,
+      label: offer.label,
+      price: money(offer.price_cents, offer.currency),
+      in_stock: offer.in_stock,
+      requires_shipping: offer.requires_shipping,
+      sku: offer.sku,
+    })),
     variants:
       design.variants.length > 0
         ? offers
