@@ -6,20 +6,28 @@ This document is the starting point for a new session.
 
 - Repository: `C:\Users\steph\Documents\Event Day Signs`
 - Branch: `main`
-- Last implementation commit: `2dbe008` (`fix: avoid cache purge failure on credential saves`).
-- `origin/main` is synchronized with local `main` at `2dbe008`.
+- Last implementation commit: `3b36588` (`fix: redirect after cache-disabled product mutations`).
+- `origin/main` is synchronized with local `main` at `3b36588`.
 - Staging Worker is deployed at
   `https://event-day-signs-staging.stephen-8cc.workers.dev` with dedicated D1,
   public-image R2, private-files R2, SESSION KV, `AUTH_SECRET`, and `SECRETS_KEK`.
-- Staging onboarding is available at `/admin/setup`. The storefront currently
-  has no published products, so there is nothing available for normal checkout
-  testing yet.
+- Staging onboarding is available at `/admin/setup`.
+- A published staging test product, “Suck it up princess,” is available at
+  `/products/suck-it-up-princess-7` with two designs and two printed sizes:
+  12x18 in and 24x36 in. Its digital ZIP is attached to the product.
+- Repeated submissions during the earlier product-save HTTP 500 created
+  duplicate test rows. Do not delete them without explicit owner approval; the
+  current product is public ID `prod_q1vz9276rd`.
 - Stripe staging has separate webhook destinations configured for regular
   orders (`/api/webhook/stripe`) and memberships
   (`/api/webhook/stripe-membership`). The corresponding signing secrets are
   entered in the two separate Admin → Settings → Payments fields. The Stripe
   test secret key and membership Price ID still need confirmation/configuration.
 - No production migration, deployment, provider credential, or live Printify submission has been performed.
+- Product mutation redirect fix: staging now treats the intentionally disabled
+  cache API as a no-op during admin product saves, updates, and deletes, so the
+  mutation can reach its intended `/admin/products` redirect. Deployed as
+  Worker version `4a863cc7-ca96-4e57-8501-aa31689596bc`.
 
 ## Completed milestones
 
@@ -45,8 +53,8 @@ This document is the starting point for a new session.
   signed/idempotent membership webhook state, audit records, protected admin
   configuration, and a staging membership page are implemented. Remote
   migration 0043 and separate staging webhook destinations are in place.
-  Stripe test credentials, a test Price ID, a published test catalog product,
-  and end-to-end checkout verification remain.
+  Stripe test credentials, a test Price ID, and end-to-end membership checkout
+  verification remain.
 
 ## Validation record
 
@@ -60,14 +68,14 @@ This document is the starting point for a new session.
 - Milestone 5 pricing foundation tests: passed (3 tests).
 - `astro check` after Milestone 5 foundation: passed with 0 errors and 2 pre-existing hints.
 - Staging smoke test: Worker root and `/api/products?limit=1` both returned HTTP
-  200; the fresh catalog is empty until onboarding seeds it.
-- Current staging catalog state: no published products are available. Create or
-  import the test product before attempting normal checkout or membership
-  discount verification.
+  200; the published test product storefront renders both designs and both size
+  options.
+- Normal staging checkout reaches Stripe Checkout. Membership-price and signed
+  webhook end-to-end verification remain open.
 - Full `npm run verify`: currently blocked by known baseline issues on this Windows
   environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
   boundary test has Windows path handling failures. These failures predate Milestone 2.
-- Staging D1 has migrations `0001` through `0042` applied. The FTS5 migrations
+- Staging D1 has migrations `0001` through `0043` applied. The FTS5 migrations
   `0003` and `0039` were applied through Wrangler's direct file-execution
   workaround, then recorded in the migration ledger because the remote
   migration runner has a known trigger-splitting parser bug.
@@ -84,34 +92,32 @@ This document is the starting point for a new session.
 - Claude test-product intake requirements are documented in
   `docs/event-day-signs-test-product-package.md`. The next product request is
   “Suck it up princess,” with two designs, two verified Printify sizes, and one
-  digital bundle containing all four design-size combinations.
+  digital bundle containing all four design-size combinations. The staging
+  product was created from the supplied package; no live Printify submission
+  has been made.
 
 ## Next session: resume here
 
-1. Review Claude's generated test-product package against
-   `docs/event-day-signs-test-product-package.md`.
-2. Finish staging onboarding at the deployed Worker URL and optionally load the
-   demo catalog.
-3. Create or import the “Suck it up princess” test product with its two designs,
-   digital bundle, and two approved printed sizes; publish it in staging.
-4. Enter the Stripe test secret key, regular webhook secret, membership webhook
-   secret, and annual recurring test Price ID in the admin.
-5. Verify one normal Stripe test checkout and one membership checkout, then
+1. Verify the staging admin save/delete flows now return to the products page;
+   avoid deleting duplicate rows unless explicitly approved.
+2. Enter or confirm the Stripe test secret key, regular webhook secret,
+   membership webhook secret, and annual recurring test Price ID in the admin.
+3. Verify one normal Stripe test checkout and one membership checkout, then
    confirm the corresponding webhook deliveries and admin state.
-6. Verify fresh-database and upgrade-database migration paths.
-7. Create a published digital bundle and verify that only approved assets resolve.
-8. Create a printed offer mapping and verify that no provider submission occurs.
-9. Verify duplicate fulfillment attempts reuse the same idempotency key/job.
-10. Wire Printify settings and persistence only after staging-only credentials are
+4. Verify fresh-database and upgrade-database migration paths.
+5. Create a published digital bundle and verify that only approved assets resolve.
+6. Create a printed offer mapping and verify that no provider submission occurs.
+7. Verify duplicate fulfillment attempts reuse the same idempotency key/job.
+8. Wire Printify settings and persistence only after staging-only credentials are
    available; keep the explicit no-live-submit guard disabled by default.
-11. Run one explicitly authorized provider test order, then reconcile its status.
-12. Run the complete verification suite in Linux CI or another supported environment.
-13. Verify Milestone 4's bounded output against a staging catalog larger than 50
+9. Run one explicitly authorized provider test order, then reconcile its status.
+10. Run the complete verification suite in Linux CI or another supported environment.
+11. Verify Milestone 4's bounded output against a staging catalog larger than 50
    products and confirm that the complete paginated JSON feed maps to canonical
    sitemap URLs.
-14. Resolve the remaining Milestone 5 owner decisions and finish member-price
+12. Resolve the remaining Milestone 5 owner decisions and finish member-price
     snapshots plus server-side cart/checkout integration.
-15. Do not skip the open Milestone 1–4 staging gates while continuing later
+13. Do not skip the open Milestone 1–4 staging gates while continuing later
    milestones.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`

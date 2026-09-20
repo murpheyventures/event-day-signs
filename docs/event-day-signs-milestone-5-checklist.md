@@ -1,6 +1,6 @@
 # Event Day Signs — Milestone 5 Checklist
 
-Status: Stripe staging webhooks configured; test catalog and end-to-end checkout validation remain
+Status: Stripe staging webhooks configured; test product published; end-to-end membership validation remains
 Scope: deterministic category/member pricing and membership plan configuration
 
 ## Completed
@@ -29,8 +29,9 @@ Scope: deterministic category/member pricing and membership plan configuration
   cancellation policy, and trial policy.
 - [ ] Configure Stripe test credentials, the annual test Price ID, and the
   membership customer-portal policy.
-- [ ] Create or import at least one published test product, including the
-  approved digital and printed offers needed for checkout testing.
+- [x] Create and publish the “Suck it up princess” staging test product with
+  two designs, a digital ZIP, and two printed sizes.
+- [x] Confirm a normal staging checkout reaches Stripe Checkout.
 - [ ] Verify a normal Stripe test checkout and a membership test checkout,
   including signed webhook delivery and the resulting order/membership state.
 - [ ] Add member benefit snapshots to one-time orders and wire the existing
