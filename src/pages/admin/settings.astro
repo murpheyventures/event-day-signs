@@ -268,7 +268,7 @@ if (Astro.request.method === 'POST') {
       );
     }
   } else if (action === 'save_stripe') {
-    await applySecrets(['stripe_secret_key', 'stripe_webhook_secret']);
+    await applySecrets(['stripe_secret_key', 'stripe_webhook_secret', 'stripe_membership_webhook_secret']);
   } else if (action === 'save_lightning') {
     const requestedBackend = String(form.get('lightning_backend') ?? '');
     if (requestedBackend !== 'lnbits' && requestedBackend !== 'phoenixd') {
@@ -1001,6 +1001,7 @@ const sections = [
           <input type="hidden" name="_action" value="save_stripe" />
           <SecretField name="stripe_secret_key" label="Secret key" hint="sk_live_… or sk_test_…" storedInD1={inD1('stripe_secret_key')} vault={vault} />
           <SecretField name="stripe_webhook_secret" label="Webhook signing secret" hint="whsec_…" storedInD1={inD1('stripe_webhook_secret')} vault={vault} />
+          <SecretField name="stripe_membership_webhook_secret" label="Membership webhook signing secret" hint="whsec_… (separate endpoint)" storedInD1={inD1('stripe_membership_webhook_secret')} vault={vault} />
           {vault && (
             <button type="submit" class="mt-1 rounded-md bg-brand px-4 py-2 text-xs font-medium uppercase tracking-wider text-white hover:bg-brand-hover">
               Save

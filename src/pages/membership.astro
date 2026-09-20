@@ -1,0 +1,53 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import { env } from 'cloudflare:workers';
+import { getEnabledPlan, hasActiveMembership } from '../features/membership/db';
+import { getCustomerEmail } from '../features/auth/customer';
+import { formatPrice } from '../config';
+
+const plan = await getEnabledPlan(env.DB);
+const email = await getCustomerEmail(Astro.cookies);
+const active = email ? await hasActiveMembership(env.DB, email) : false;
+const status = Astro.url.searchParams.get('status');
+---
+
+<Layout title="Membership">
+  <div class="mx-auto max-w-xl py-10">
+    <h1 class="mb-3 font-serif text-3xl tracking-tight sm:text-4xl">Membership</h1>
+    <p class="mb-6 text-muted">Save on eligible event signs with an annual membership.</p>
+    {status === 'success' && <p class="mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">Thanks — Stripe is confirming your membership.</p>}
+    {status === 'cancelled' && <p class="mb-4 rounded-md border border-line bg-surface px-3 py-2 text-sm text-muted">Checkout was cancelled.</p>}
+    {!plan?.stripe_price_id ? (
+      <p class="rounded-md border border-line bg-surface px-4 py-4 text-sm text-muted">Membership checkout is being configured for staging.</p>
+    ) : active ? (
+      <form method="post" action="/api/membership/portal">
+        <button class="rounded-md bg-brand px-4 py-2.5 font-medium text-on-brand" type="submit">Manage membership</button>
+      </form>
+    ) : (
+      <form id="membership-form" class="space-y-3">
+        <label class="block text-sm font-medium" for="email">Email address</label>
+        <input id="email" name="email" type="email" required autocomplete="email" class="w-full rounded-md border border-line px-3 py-2" />
+        <button class="rounded-md bg-brand px-4 py-2.5 font-medium text-on-brand" type="submit">Join for {formatPrice(plan.annual_price_cents, plan.currency)} / year</button>
+        <p id="membership-error" class="text-sm text-red-700" hidden></p>
+      </form>
+    )}
+  </div>
+</Layout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#membership-form');
+  const error = document.querySelector<HTMLElement>('#membership-error');
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = new FormData(form).get('email');
+    const response = await fetch('/api/membership/checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const result = await response.json() as { checkout_url?: string; error?: string };
+    if (result.checkout_url) window.location.href = result.checkout_url;
+    else if (error) { error.textContent = result.error ?? 'Membership checkout is unavailable.'; error.hidden = false; }
+  });
+</script>

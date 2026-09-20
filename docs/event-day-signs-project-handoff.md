@@ -35,6 +35,11 @@ This document is the starting point for a new session.
   plus a pure member-price resolver with precedence, effective dates, format
   filtering, and contribution-floor protection. See
   `docs/event-day-signs-milestone-5-checklist.md`.
+- **Milestone 5 membership integration:** Stripe subscription Checkout, portal,
+  signed/idempotent membership webhook state, audit records, protected admin
+  configuration, and a staging membership page are implemented. Stripe
+  credentials, a test Price ID, remote migration 0043, and checkout price
+  snapshots remain to be configured.
 
 ## Validation record
 

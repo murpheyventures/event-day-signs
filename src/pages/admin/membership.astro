@@ -1,0 +1,53 @@
+---
+export const prerender = false;
+import { env } from 'cloudflare:workers';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+let plan = await env.DB.prepare('SELECT * FROM membership_plans ORDER BY id LIMIT 1').first<{
+  id: number;
+  name: string;
+  currency: string;
+  annual_price_cents: number;
+  stripe_price_id: string | null;
+  enabled: number;
+}>();
+let saved = false;
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const name = String(form.get('name') ?? '').trim();
+  const price = Number(form.get('annual_price_cents'));
+  const stripePriceId = String(form.get('stripe_price_id') ?? '').trim() || null;
+  const enabled = form.get('enabled') === '1';
+  if (!name || !Number.isSafeInteger(price) || price < 0) {
+    error = 'Enter a plan name and a non-negative whole-number price in cents.';
+  } else if (enabled && !stripePriceId) {
+    error = 'A Stripe Price ID is required before enabling membership checkout.';
+  } else if (plan) {
+    await env.DB.prepare(
+      `UPDATE membership_plans SET name = ?, annual_price_cents = ?, stripe_price_id = ?, enabled = ?, updated_at = datetime('now') WHERE id = ?`,
+    ).bind(name, price, stripePriceId, enabled ? 1 : 0, plan.id).run();
+    plan = await env.DB.prepare('SELECT * FROM membership_plans WHERE id = ?').bind(plan.id).first<typeof plan>();
+    saved = true;
+  }
+}
+---
+
+<AdminLayout title="Membership" active="membership">
+  <div class="mb-8">
+    <h1 class="font-serif text-3xl tracking-tight">Membership</h1>
+    <p class="mt-2 max-w-2xl text-sm text-gray-500">Configure the annual Stripe membership. Use a Stripe test-mode Price ID on staging.</p>
+  </div>
+  {saved && <p class="mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">Membership settings saved.</p>}
+  {error && <p class="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+  {plan ? (
+    <form method="POST" class="max-w-xl space-y-5 rounded-lg border border-line bg-white p-6">
+      <label class="block text-sm font-medium">Plan name<input name="name" value={plan.name} required class="mt-1 w-full rounded-md border border-line px-3 py-2" /></label>
+      <label class="block text-sm font-medium">Annual price (cents)<input name="annual_price_cents" type="number" min="0" step="1" value={plan.annual_price_cents} required class="mt-1 w-full rounded-md border border-line px-3 py-2" /></label>
+      <label class="block text-sm font-medium">Stripe Price ID<input name="stripe_price_id" value={plan.stripe_price_id ?? ''} placeholder="price_..." class="mt-1 w-full rounded-md border border-line px-3 py-2" /></label>
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" value="1" checked={plan.enabled === 1} /> Enable membership checkout</label>
+      <button class="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-hover" type="submit">Save membership</button>
+    </form>
+  ) : <p class="text-sm text-gray-500">No membership plan exists. Apply migration 0043 first.</p>}
+</AdminLayout>

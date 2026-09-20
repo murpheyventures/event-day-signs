@@ -31,6 +31,7 @@ export const PUBLIC_ID_PREFIXES = {
   bundleAsset: 'bast',
   printMapping: 'pmap',
   fulfillmentJob: 'fjob',
+  membership: 'mem',
 } as const;
 
 export type PublicIdKind = keyof typeof PUBLIC_ID_PREFIXES;

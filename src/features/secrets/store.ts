@@ -15,6 +15,7 @@ import { decryptSecret, encryptSecret } from './crypto';
 export type SecretName =
   | 'stripe_secret_key'
   | 'stripe_webhook_secret'
+  | 'stripe_membership_webhook_secret'
   | 'opennode_api_key'
   | 'shippo_api_key'
   | 'resend_api_key'
@@ -25,6 +26,7 @@ export type SecretName =
 export const SECRET_NAMES: readonly SecretName[] = [
   'stripe_secret_key',
   'stripe_webhook_secret',
+  'stripe_membership_webhook_secret',
   'opennode_api_key',
   'shippo_api_key',
   'resend_api_key',
