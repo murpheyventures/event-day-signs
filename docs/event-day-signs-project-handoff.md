@@ -10,6 +10,11 @@ This document is the starting point for a new session.
   the commit that accompanies this handoff).
 - `origin/main` is synchronized before this handoff commit; push this commit to
   keep the remote continuation point current.
+- Staging Worker is deployed at
+  `https://event-day-signs-staging.stephen-8cc.workers.dev` with dedicated D1,
+  public-image R2, private-files R2, SESSION KV, `AUTH_SECRET`, and `SECRETS_KEK`.
+- Staging onboarding is not complete: open `/admin/setup`, set the admin
+  password, and optionally load the demo catalog. Stripe remains unconfigured.
 - No production migration, deployment, provider credential, or live Printify submission has been performed.
 
 ## Completed milestones
@@ -44,6 +49,8 @@ This document is the starting point for a new session.
 - `astro check` after Milestone 4: passed with 0 errors and 2 pre-existing hints.
 - Milestone 5 pricing foundation tests: passed (3 tests).
 - `astro check` after Milestone 5 foundation: passed with 0 errors and 2 pre-existing hints.
+- Staging smoke test: Worker root and `/api/products?limit=1` both returned HTTP
+  200; the fresh catalog is empty until onboarding seeds it.
 - Full `npm run verify`: currently blocked by known baseline issues on this Windows
   environment: Vitest cannot resolve `cloudflare:workers`, and the storefront
   boundary test has Windows path handling failures. These failures predate Milestone 2.
@@ -61,21 +68,24 @@ This document is the starting point for a new session.
 
 ## Next session: resume here
 
-1. Apply `migrations/0041_delivery_catalog.sql` to the dedicated staging D1.
-2. Verify fresh-database and upgrade-database migration paths.
-3. Create a published digital bundle and verify that only approved assets resolve.
-4. Create a printed offer mapping and verify that no provider submission occurs.
-5. Verify duplicate fulfillment attempts reuse the same idempotency key/job.
-6. Wire Printify settings and persistence only after staging-only credentials are
+1. Finish staging onboarding at the deployed Worker URL and optionally load the
+   demo catalog.
+2. Enter Stripe test credentials in Admin → Settings → Payments and configure
+   the Stripe webhook endpoint/signing secret.
+3. Verify fresh-database and upgrade-database migration paths.
+4. Create a published digital bundle and verify that only approved assets resolve.
+5. Create a printed offer mapping and verify that no provider submission occurs.
+6. Verify duplicate fulfillment attempts reuse the same idempotency key/job.
+7. Wire Printify settings and persistence only after staging-only credentials are
    available; keep the explicit no-live-submit guard disabled by default.
-7. Run one explicitly authorized provider test order, then reconcile its status.
-8. Run the complete verification suite in Linux CI or another supported environment.
-9. Verify Milestone 4's bounded output against a staging catalog larger than 50
+8. Run one explicitly authorized provider test order, then reconcile its status.
+9. Run the complete verification suite in Linux CI or another supported environment.
+10. Verify Milestone 4's bounded output against a staging catalog larger than 50
    products and confirm that the complete paginated JSON feed maps to canonical
    sitemap URLs.
-10. Resolve Milestone 5 owner decisions, then add Stripe membership state,
+11. Resolve Milestone 5 owner decisions, then add Stripe membership state,
     event handling, admin configuration, and checkout integration.
-11. Do not skip the open Milestone 1–4 staging gates while continuing later
+12. Do not skip the open Milestone 1–4 staging gates while continuing later
     milestones.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`

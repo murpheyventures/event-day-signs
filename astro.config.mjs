@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import { resolve } from 'node:path';
 import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 import { resolveTheme } from './scripts/themes.mjs';
@@ -28,9 +29,10 @@ const themeStamp = {
   hooks: {
     'astro:build:done': async () => {
       const { writeFileSync, mkdirSync } = await import('node:fs');
-      mkdirSync(new URL('./dist', import.meta.url).pathname, { recursive: true });
+      const distPath = resolve(import.meta.dirname, 'dist');
+      mkdirSync(distPath, { recursive: true });
       writeFileSync(
-        new URL('./dist/theme.json', import.meta.url).pathname,
+        resolve(distPath, 'theme.json'),
         `${JSON.stringify({ theme: theme.id }, null, 2)}\n`,
       );
     },
