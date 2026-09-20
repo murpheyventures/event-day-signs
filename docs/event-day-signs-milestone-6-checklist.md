@@ -1,6 +1,6 @@
 # Event Day Signs — Milestone 6 Checklist
 
-Status: review foundation started
+Status: implementation complete; policy and supported-environment validation remain
 Scope: native verified-purchase reviews attached to normalized designs
 
 ## Completed in this slice
@@ -19,7 +19,7 @@ Scope: native verified-purchase reviews attached to normalized designs
 - [x] Add review submission page/API; rate limiting remains open.
 - [x] Add bounded scheduled review-request delivery through the configured email seam.
 - [x] Add moderation/admin list, approve/reject/hide, merchant reply, and audit UI.
-- [ ] Render approved reviews and aggregates on normalized design pages only.
+- [x] Render approved reviews and aggregates on normalized design pages only.
 - [x] Add abuse reports and the future customer-photo extension slot.
 - [ ] Decide moderation default, request timing, display-name policy, and any
   incentive/disclosure language.
