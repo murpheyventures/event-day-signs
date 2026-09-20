@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import { listApprovedReviews, reviewSummary, submitVerifiedReview, type ReviewFormat } from '../../features/reviews/db';
+import { listApprovedReviews, reportReview, reviewSummary, submitVerifiedReview, type ReviewFormat } from '../../features/reviews/db';
 
 export const prerender = false;
 
@@ -35,4 +35,11 @@ export const POST: APIRoute = async ({ request }) => {
   });
   if (!review) return Response.json({ error: 'This review link is invalid, expired, or already used.' }, { status: 400 });
   return Response.json({ review_id: review.public_id, status: review.moderation_state }, { status: 201 });
+};
+
+export const PUT: APIRoute = async ({ request }) => {
+  let body: { review_id?: unknown; reason?: unknown; reporter_hint?: unknown };
+  try { body = await request.json() as typeof body; } catch { return Response.json({ error: 'Invalid JSON.' }, { status: 400 }); }
+  const ok = await reportReview(env.DB, typeof body.review_id === 'string' ? body.review_id : '', typeof body.reason === 'string' ? body.reason : '', typeof body.reporter_hint === 'string' ? body.reporter_hint : null);
+  return ok ? Response.json({ reported: true }, { status: 201 }) : Response.json({ error: 'Invalid review report.' }, { status: 400 });
 };

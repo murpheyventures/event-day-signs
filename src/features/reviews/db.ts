@@ -1,5 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { generatePublicId } from '../ids/publicId';
+import { getEmailProvider } from '../email';
+import { getConfig } from '../../config';
 
 export type ReviewFormat = 'digital' | 'printed';
 export type ReviewModerationState = 'pending' | 'approved' | 'rejected' | 'hidden';
@@ -45,16 +47,50 @@ export async function createReviewRequestToken(
   const token = randomToken();
   const inserted = await db
     .prepare(
-      `INSERT INTO review_request_tokens (token_hash, order_item_id, design_id, expires_at)
-       SELECT ?, oi.id, ?, ?
+      `INSERT INTO review_request_tokens (token_hash, token, order_item_id, design_id, expires_at)
+       SELECT ?, ?, oi.id, ?, ?
          FROM order_items oi JOIN orders o ON o.id = oi.order_id
         WHERE oi.id = ? AND o.status = 'paid'
           AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.order_item_id = oi.id)
        RETURNING id`,
     )
-    .bind(await hashToken(token), designId, expiresAt, orderItemId)
+    .bind(await hashToken(token), token, orderItemId, designId, expiresAt)
     .first<{ id: number }>();
   return inserted ? { token, orderItemId, designId, expiresAt } : null;
+}
+
+export async function scheduleReviewRequests(db: D1Database, origin: string, limit = 10): Promise<number> {
+  const emailer = await getEmailProvider();
+  if (!emailer) return 0;
+  const { results } = await db.prepare(`
+    SELECT oi.id AS order_item_id, oi.design_id, oi.name, oi.file_key, o.email
+      FROM order_items oi JOIN orders o ON o.id = oi.order_id
+     WHERE o.status = 'paid' AND o.email IS NOT NULL AND oi.design_id IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.order_item_id = oi.id)
+       AND NOT EXISTS (SELECT 1 FROM review_request_tokens t WHERE t.order_item_id = oi.id)
+       AND ((oi.file_key IS NOT NULL AND o.created_at <= datetime('now', '-7 days'))
+         OR (oi.file_key IS NULL AND o.fulfillment_status = 'fulfilled' AND o.fulfilled_at <= datetime('now', '-3 days')))
+     ORDER BY o.created_at ASC LIMIT ?`).bind(Math.max(1, Math.min(50, limit))).all<{ order_item_id: number; design_id: number; name: string; email: string; }>();
+  let sent = 0;
+  for (const item of results ?? []) {
+    const request = await createReviewRequestToken(db, item.order_item_id, item.design_id, new Date(Date.now() + 30 * 86400000).toISOString());
+    if (!request) continue;
+    const url = `${origin}/review?token=${encodeURIComponent(request.token)}`;
+    try {
+      await emailer.send({
+        to: item.email,
+        subject: `How was your ${getConfig().storeName} purchase?`,
+        text: `We would love your feedback about ${item.name}. Leave a review: ${url}`,
+        html: `<p>We would love your feedback about <strong>${item.name.replace(/[<>&]/g, '')}</strong>.</p><p><a href="${url}">Leave a verified review</a></p>`,
+        idempotencyKey: `review-request/${item.order_item_id}`,
+      });
+      await db.prepare("UPDATE review_request_tokens SET sent_at = datetime('now'), attempts = attempts + 1 WHERE order_item_id = ?").bind(item.order_item_id).run();
+      sent++;
+    } catch (error) {
+      await db.prepare("UPDATE review_request_tokens SET attempts = attempts + 1, last_error = ? WHERE order_item_id = ?").bind(String(error).slice(0, 500), item.order_item_id).run();
+    }
+  }
+  return sent;
 }
 
 /** Consume a credential and create a pending review atomically. */
@@ -124,4 +160,12 @@ export async function moderateReview(db: D1Database, publicId: string, state: Ex
 export async function reviewSummary(db: D1Database, designId: number): Promise<{ count: number; average: number | null }> {
   const row = await db.prepare("SELECT COUNT(*) AS count, AVG(rating) AS average FROM reviews WHERE design_id = ? AND moderation_state = 'approved'").bind(designId).first<{ count: number; average: number | null }>();
   return { count: row?.count ?? 0, average: row?.average ?? null };
+}
+
+export async function reportReview(db: D1Database, reviewPublicId: string, reason: string, reporterHint: string | null): Promise<boolean> {
+  const review = await db.prepare('SELECT id FROM reviews WHERE public_id = ?').bind(reviewPublicId).first<{ id: number }>();
+  const clean = reason.trim();
+  if (!review || clean.length < 1 || clean.length > 500) return false;
+  await db.prepare('INSERT INTO review_reports (review_id, reason, reporter_hint) VALUES (?, ?, ?)').bind(review.id, clean, reporterHint).run();
+  return true;
 }

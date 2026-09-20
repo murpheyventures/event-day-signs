@@ -6,6 +6,9 @@ import { loadProductDetail } from '../../features/storefront/productDetail';
 import { getConfig } from '../../config';
 import { publicOrigin } from '../../features/http/origin';
 import { addCacheTags, productCacheTags } from '../../features/cache/tags';
+import { getDesignBySlug, getNormalizedDesign } from '../../features/catalog/db';
+import NormalizedDesignDetail from '../../features/catalog/NormalizedDesignDetail.astro';
+import { listApprovedReviews, reviewSummary } from '../../features/reviews/db';
 
 const loaded = await loadProductDetail(env.DB, {
   slug: Astro.params.slug,
@@ -20,22 +23,27 @@ const loaded = await loadProductDetail(env.DB, {
 
 // Status, metadata, JSON-LD, and cache tagging stay with the route: none of
 // them is a presentation decision, and all of them are easy to break silently.
-if (loaded.status === 'not_found') {
-  return new Response('Not found', { status: 404 });
-}
+const normalized = loaded.status === 'not_found' && Astro.params.slug
+  ? await getNormalizedDesign(env.DB, Astro.params.slug)
+  : null;
+if (loaded.status === 'not_found' && !normalized) return new Response('Not found', { status: 404 });
 
-const { model, purchase, seo } = loaded;
-addCacheTags(Astro.response.headers, productCacheTags(loaded.cacheTagIds));
-if (loaded.backfillRelated) {
+const normalizedRow = normalized && Astro.params.slug ? await getDesignBySlug(env.DB, Astro.params.slug) : null;
+const normalizedReviews = normalizedRow ? await listApprovedReviews(env.DB, normalizedRow.id) : [];
+const normalizedSummary = normalizedRow ? await reviewSummary(env.DB, normalizedRow.id) : null;
+
+const { model, purchase, seo } = loaded.status === 'ok' ? loaded : { model: null, purchase: null, seo: null };
+if (loaded.status === 'ok') addCacheTags(Astro.response.headers, productCacheTags(loaded.cacheTagIds));
+if (loaded.status === 'ok' && loaded.backfillRelated) {
   // After the response is sent, so the shopper never waits on it.
   Astro.locals.cfContext?.waitUntil(loaded.backfillRelated());
 }
 ---
 
-<Layout title={seo.title} description={seo.description ?? undefined} image={seo.imagePath}>
-  <ProductDetail model={model} purchase={purchase} />
+<Layout title={seo?.title ?? normalized?.title ?? ''} description={seo?.description ?? normalized?.description ?? undefined} image={seo?.imagePath}>
+  {normalized && normalizedSummary ? <NormalizedDesignDetail design={normalized} reviews={normalizedReviews} average={normalizedSummary.average} count={normalizedSummary.count} /> : model && purchase ? <ProductDetail model={model} purchase={purchase} /> : null}
 
-  <script is:inline type="application/ld+json" set:html={seo.jsonLd} />
+  {seo && <script is:inline type="application/ld+json" set:html={seo.jsonLd} />}
 
   {/* Live price + hero image: reflect the chosen variant + checked add-ons. No-JS
       still works — the server computes the real price in cart/checkout, and the

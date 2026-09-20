@@ -17,10 +17,10 @@ Scope: native verified-purchase reviews attached to normalized designs
 ## Remaining
 
 - [x] Add review submission page/API; rate limiting remains open.
-- [ ] Add review-request scheduling through the email outbox.
+- [x] Add bounded scheduled review-request delivery through the configured email seam.
 - [x] Add moderation/admin list, approve/reject/hide, merchant reply, and audit UI.
 - [ ] Render approved reviews and aggregates on normalized design pages only.
-- [ ] Add abuse reports and the future customer-photo extension slot.
+- [x] Add abuse reports and the future customer-photo extension slot.
 - [ ] Decide moderation default, request timing, display-name policy, and any
   incentive/disclosure language.
 - [ ] Run fresh/upgrade migration validation and supported-environment verify.

@@ -1,0 +1,27 @@
+---
+import { formatPrice } from '../../config';
+import type { NormalizedDesign } from './normalized';
+import type { Review } from '../reviews/db';
+
+interface Props { design: NormalizedDesign; reviews: Review[]; average: number | null; count: number; }
+const { design, reviews, average, count } = Astro.props;
+---
+
+<section class="mx-auto max-w-3xl">
+  <p class="text-xs uppercase tracking-[0.25em] text-muted">Event sign</p>
+  <h1 class="mt-2 font-serif text-4xl tracking-tight">{design.title}</h1>
+  {design.description && <p class="mt-4 max-w-2xl text-muted">{design.description}</p>}
+  <div class="mt-8 grid gap-3 sm:grid-cols-2">
+    {design.offers.map((offer) => (
+      <div class="rounded-lg border border-line bg-surface p-4">
+        <p class="font-medium">{offer.label ?? (offer.format === 'digital' ? 'Digital bundle' : 'Printed sign')}</p>
+        <p class="mt-1 text-sm text-muted">{offer.format === 'digital' ? 'Instant download' : 'Printed fulfillment'}</p>
+        <p class="mt-3 tabular-nums">{formatPrice(offer.price_cents, offer.currency)}</p>
+      </div>
+    ))}
+  </div>
+  <section class="mt-12" aria-labelledby="reviews-heading">
+    <div class="flex items-baseline justify-between gap-4"><h2 id="reviews-heading" class="font-serif text-2xl">Verified reviews</h2><span class="text-sm text-muted">{count ? `${average?.toFixed(1)} / 5 · ${count} review${count === 1 ? '' : 's'}` : 'No reviews yet'}</span></div>
+    {reviews.length > 0 && <div class="mt-5 space-y-4">{reviews.map((review) => <article class="rounded-lg border border-line p-4"><div class="text-sm font-medium">{'★'.repeat(review.rating)}<span class="ml-3 text-muted">{review.display_name}</span></div><p class="mt-2 whitespace-pre-wrap text-sm">{review.body}</p>{review.merchant_response && <p class="mt-3 border-l-2 border-brand pl-3 text-sm text-muted">Store response: {review.merchant_response}</p>}</article>)}</div>}
+  </section>
+</section>

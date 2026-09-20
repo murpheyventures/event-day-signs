@@ -3,6 +3,7 @@ import { env } from 'cloudflare:workers';
 import { sweepStaleNotifications } from './features/email/outbox';
 import { releaseExpiredReservations } from './features/orders/reservations';
 import { getSetting } from './features/settings/db';
+import { scheduleReviewRequests } from './features/reviews/db';
 
 /**
  * Worker entrypoint.
@@ -43,6 +44,7 @@ async function runScheduledSweeps(): Promise<void> {
   try {
     const origin = await getSetting(db, 'store_url');
     if (origin) {
+      await scheduleReviewRequests(db, origin, 10);
       await sweepStaleNotifications(db, origin);
     }
   } catch (err) {
