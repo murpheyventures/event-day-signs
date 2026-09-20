@@ -6,8 +6,8 @@ This document is the starting point for a new session.
 
 - Repository: `C:\Users\steph\Documents\Event Day Signs`
 - Branch: `main`
-- Last implementation commit: milestone 3 guarded Printify fulfillment adapter (see git log).
-- Milestone 3 implementation is ready to commit and push to `origin/main`.
+- Last implementation commit: `863781a` guarded Printify fulfillment adapter.
+- `origin/main` is synchronized with the local `main` branch.
 - No production migration, deployment, provider credential, or live Printify submission has been performed.
 
 ## Completed milestones
@@ -23,6 +23,10 @@ This document is the starting point for a new session.
   new records. See `docs/event-day-signs-milestone-2-checklist.md`.
 - **Milestone 3:** guarded Printify adapter and provider-status mapping. See
   `docs/event-day-signs-milestone-3-checklist.md`.
+- **Milestones 4–10 architecture:** continuation roadmap covering Printify
+  completion, ready-by estimates, membership/pricing, reviews, SEO/AEO/GEO,
+  theme, scale/AI/agentic-commerce spike, and final UAT. See
+  `docs/event-day-signs-milestones-4-10-architecture.md`.
 
 ## Validation record
 
@@ -38,6 +42,9 @@ This document is the starting point for a new session.
 - The Printify adapter is intentionally not wired to runtime settings yet; do not enable
   provider submission until staging credentials, mapping persistence, and an explicit
   no-live-submit operational guard are in place.
+- The normalized catalog and delivery tables are foundation-only. Digital bundle
+  completeness for every approved variant and size, printed size/colorway
+  selection, order snapshotting, and checkout integration remain open.
 
 ## Next session: resume here
 
@@ -50,6 +57,9 @@ This document is the starting point for a new session.
    available; keep the explicit no-live-submit guard disabled by default.
 7. Run one explicitly authorized provider test order, then reconcile its status.
 8. Run the complete verification suite in Linux CI or another supported environment.
+9. Use `docs/event-day-signs-milestones-4-10-architecture.md` as the approved
+   roadmap. Do not skip the open Milestone 1–3 staging gates when beginning
+   Milestone 4.
 
 Read `AGENTS.md` before editing. In particular: use Node 22, run `npm run verify`
 after meaningful changes, keep migrations additive, keep payment and fulfillment

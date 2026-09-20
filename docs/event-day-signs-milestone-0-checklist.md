@@ -1,6 +1,6 @@
 # Event Day Signs — Milestone 0 Checklist and Issue List
 
-Status: Draft for owner review; not committed  
+Status: Approved and committed in `be63aa8`
 Repository: `murpheyventures/event-day-signs`  
 Baseline commit: `c964bf746926ae039a97d69720eee26fb97ba06f`
 

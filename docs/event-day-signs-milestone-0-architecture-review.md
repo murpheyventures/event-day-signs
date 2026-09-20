@@ -1,6 +1,6 @@
 # Event Day Signs — Milestone 0 Architecture Review
 
-Status: Draft for owner review  
+Status: Approved by owner; committed in `be63aa8`
 Baseline: `ddyy/minshop` at `c964bf746926ae039a97d69720eee26fb97ba06f`  
 Fork: `https://github.com/murpheyventures/event-day-signs`  
 Deployment target: Cloudflare Workers + D1 + R2 on `workers.dev`
