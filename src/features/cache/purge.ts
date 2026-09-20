@@ -19,7 +19,9 @@ function purgeFailure(
 }
 
 function cacheIsDisabled(error: unknown): boolean {
-  return error instanceof Error && /cache(?:notenabled| not enabled)/i.test(error.message);
+  const value = error as { name?: unknown; message?: unknown } | null;
+  const text = `${String(value?.name ?? '')} ${String(value?.message ?? error ?? '')}`;
+  return /cache(?:notenabled| not enabled| disabled)|cache.*not enabled/i.test(text);
 }
 
 /**
