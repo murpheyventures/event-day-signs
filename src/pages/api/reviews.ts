@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import { listApprovedReviews, reportReview, reviewSummary, submitVerifiedReview, type ReviewFormat } from '../../features/reviews/db';
+import { formatReviewDisplayName, listApprovedReviews, reportReview, reviewSummary, submitVerifiedReview, type ReviewFormat } from '../../features/reviews/db';
 
 export const prerender = false;
 
@@ -24,13 +24,14 @@ export const POST: APIRoute = async ({ request }) => {
   const input = body as Record<string, unknown>;
   const token = typeof input.token === 'string' ? input.token.trim() : '';
   const format = input.format === 'printed' ? 'printed' : input.format === 'digital' ? 'digital' : null;
-  if (!token || !format || typeof input.body !== 'string' || typeof input.display_name !== 'string') {
-    return Response.json({ error: 'token, body, display_name, and format are required.' }, { status: 400 });
+  const displayName = formatReviewDisplayName({ firstName: input.first_name, lastInitial: input.last_initial, anonymous: input.anonymous === true });
+  if (!token || !format || typeof input.body !== 'string' || !displayName) {
+    return Response.json({ error: 'token, body, first_name, last_initial, and format are required.' }, { status: 400 });
   }
   const review = await submitVerifiedReview(env.DB, token, {
     rating: Number(input.rating),
     body: input.body,
-    displayName: input.display_name,
+    displayName,
     format: format as ReviewFormat,
   });
   if (!review) return Response.json({ error: 'This review link is invalid, expired, or already used.' }, { status: 400 });

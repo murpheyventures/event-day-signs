@@ -6,6 +6,14 @@ import { getConfig } from '../../config';
 export type ReviewFormat = 'digital' | 'printed';
 export type ReviewModerationState = 'pending' | 'approved' | 'rejected' | 'hidden';
 
+export function formatReviewDisplayName(input: { firstName?: unknown; lastInitial?: unknown; anonymous?: unknown }): string | null {
+  if (input.anonymous === true) return 'Anonymous';
+  const firstName = typeof input.firstName === 'string' ? input.firstName.trim() : '';
+  const lastInitial = typeof input.lastInitial === 'string' ? input.lastInitial.trim() : '';
+  if (!/^\p{L}[\p{L}' -]{0,59}$/u.test(firstName) || !/^\p{L}$/u.test(lastInitial)) return null;
+  return `${firstName} ${lastInitial}.`;
+}
+
 export interface Review {
   id: number;
   public_id: string;

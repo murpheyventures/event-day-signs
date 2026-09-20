@@ -21,8 +21,10 @@ Scope: native verified-purchase reviews attached to normalized designs
 - [x] Add moderation/admin list, approve/reject/hide, merchant reply, and audit UI.
 - [x] Render approved reviews and aggregates on normalized design pages only.
 - [x] Add abuse reports and the future customer-photo extension slot.
-- [ ] Decide moderation default, request timing, display-name policy, and any
-  incentive/disclosure language.
+- [x] Decide moderation default (hidden until approved), request timing (7 days
+  for digital orders and 3 days after printed fulfillment), display-name policy
+  (first name plus last initial, with anonymous allowed), and no incentives.
 - [ ] Run fresh/upgrade migration validation and supported-environment verify.
 
-Owner decisions remain placeholders until the review UI becomes customer-visible.
+Owner decisions are finalized for the current review UI; migration validation and
+supported-environment verification remain operational follow-ups.
